@@ -1,0 +1,155 @@
+================================================================
+09_JAVA_SPRING — JAVA, SPRING BOOT, MAVEN, AND GRADLE
+================================================================
+<leader> is Space. [PLUGIN] = LazyVim/plugin. [CUSTOM] = local helpers.
+Shared editor and LSP keys: 07_LSP_COMPLETION.txt.
+Existing demo: ~/Workspace/Vim/spring-demo, HTTP port 8089.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+jdtls is the Java Language Server. nvim-jdtls connects its Java-specific
+features to Neovim. Together they support navigation, completion, imports,
+refactoring, JUnit, and Java debugging. Maven and Gradle provide project
+build information. Lombok support uses a Java agent when the jar is present.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use Neovim for daily Java edits, tests, and request debugging. Use IntelliJ
+for features such as Spring bean views, endpoint tools, move-class refactors,
+or a large dependency analysis. Those IDE views are not configured here.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Understand the two JDK roles [CUSTOM helper + PLUGIN]:
+  Launcher JDK: runs jdtls. This configuration selects version 21 or later.
+  It prefers a suitable JAVA_HOME, otherwise the newest suitable discovered JDK.
+  Project JDK: provides the runtime/libraries used for project analysis.
+  The project build settings and installed java.configuration.runtimes matter.
+  The helper searches JAVA_HOME, ~/.sdkman/candidates/java/*,
+  /usr/lib/jvm/*, and ~/.jdks/*. It does not install or change a system JDK.
+  A project that needs a missing JDK may still fail. Inspect :JdtSetRuntime
+  and the build settings rather than forcing every project onto the launcher JDK.
+  Maven/Gradle launched in the terminal inherits the shell environment.
+
+Open the project:
+  cd ~/Workspace/Vim/spring-demo && nvim
+  Open src/main/java/com/example/demo/controller/GreetingController.java.
+  Wait for jdtls to import the project. Use <leader>cl and the statusline.
+  There is no guaranteed import time; dependencies may need network access.
+  The helper chooses a Gradle settings root or walks adjacent build roots
+  upward. A multi-module build normally shares one jdtls instance.
+  Separate project paths get unique workspaces under
+  ~/.cache/nvim/jdtls/<name>-<hash>/workspace/.
+  Gradle wrapper import is enabled, but execution was not tested here.
+
+Read and change code [PLUGIN/NEOVIM LSP]:
+  gd definition; gI implementation; gy type; K documentation.
+  grr or <leader>cu references; <leader>ss file symbols; <leader>sS workspace symbols.
+  <leader>cr renames; <leader>ca offers quick fixes and generation actions.
+  <leader>cA offers source actions. Available actions depend on the code.
+  <leader>cxv extracts a variable; <leader>cxc a constant.
+  Select lines, then <leader>cxm extracts a method.
+  <leader>cgs goes to a superclass implementation.
+  <leader>cgS goes from a test to the subject class; it is not a universal
+  class-to-test toggle.
+  gd can open a dependency's source or decompiled jdt:// text.
+
+Imports and formatting:
+  <leader>co organizes imports. Large star-import thresholds avoid most
+  wildcard imports. <leader>cf explicitly formats with jdtls/Eclipse.
+  Java format-on-save is disabled. The formatter can differ from IntelliJ.
+  The indentation helper uses four columns, follows existing tabs when
+  detected, and respects an EditorConfig indentation setting.
+
+4. IMPORTANT RUN, TEST, AND PROJECT COMMANDS
+----------------------------------------------------------------
+Runner [CUSTOM; wrapper preferred when present]:
+  <leader>rr  Maven spring-boot:run; Gradle bootRun
+  <leader>rb  Maven package -DskipTests; Gradle build -x test
+  <leader>rt  Maven test; Gradle test
+  <leader>rc  custom command; <leader>rl repeats the last runner command
+  Maven submodule build/test adds -pl <module> -am. Run adds -pl only.
+  Gradle submodules use a :subproject:task prefix.
+  A sibling Maven module may need a prior install before spring-boot:run.
+  Review the command and dependencies before choosing a project-wide install.
+
+JUnit [PLUGIN: nvim-jdtls + java-test, buffer-local after attach]:
+  <leader>tt current class; <leader>tr nearest method; <leader>tT picks a test.
+  <leader>dr opens test output in the debug console.
+  Go neotest summary/output keys are not Java test-result integrations.
+
+Project commands [PLUGIN; some are Java-buffer-local]:
+  :JdtUpdateConfig      refresh build configuration
+  :JdtUpdateDebugConfig refresh launch choices
+  :JdtShowLogs          open jdtls logs
+  :JdtRestart           restart this Java server
+  :JdtSetRuntime        choose a configured runtime
+  :JdtCompile          compile through jdtls
+  :JdtShowMavenActiveProfiles / :JdtUpdateMavenActiveProfiles
+  :JdtWipeDataAndRestart clears the project's workspace and imports again.
+  Use this after simpler checks. It discards cached project state.
+
+5. PRACTICAL EXAMPLE: DEBUG A CONTROLLER
+----------------------------------------------------------------
+1. Open GreetingController.java in a disposable demo copy.
+2. Put a breakpoint on an executable line with <leader>db.
+3. Start <leader>dc and choose Launch ... DemoApplication.
+4. Run curl 'http://localhost:8089/greeting?name=Neovim' elsewhere.
+5. Inspect name; evaluate name.toUpperCase() in <leader>dr.
+6. Step with F8, continue with F9, then terminate with <leader>dt.
+Main classes are discovered when debugging starts. If discovery times out,
+wait for import, retry, or run :JdtUpdateDebugConfig.
+For ordinary running, use <leader>rr and stop it with Ctrl-c in its terminal.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+A launcher JDK does not guarantee the project's required JDK is installed.
+Completion may be empty during import. Check progress rather than repeatedly
+restarting a server that is still working.
+Adding a dependency can require build refresh and a successful dependency
+download. :JdtUpdateConfig cannot fix a bad repository URL or offline download.
+A test mapping only applies after jdtls attaches in a Java buffer.
+A second app on port 8089 fails if the first runner/debug session is still active.
+
+7. RECOVERY
+----------------------------------------------------------------
+Undo a wrong refactor in each changed buffer. Review Git diff.
+For import trouble: inspect :JdtShowLogs, check Maven/Gradle in a terminal,
+then :JdtUpdateConfig. Use :JdtRestart before clearing workspace data.
+Do not remove the whole Neovim cache or stop every Java process to fix
+one project. Terminate the affected debug session with <leader>dt.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+cx = extract. cg = go to. co = organize. cf = format.
+Wait for Java import before judging code features.
+Saving Java writes text; formatting is an explicit choice.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open the demo and confirm jdtls with <leader>cl.
+2. Trace controller to service with gd and gI, then return with Ctrl-o.
+3. In a copy, rename greet and inspect every changed file.
+4. Run GreetingServiceImplTest with <leader>tt, then a method with <leader>tr.
+5. Introduce and fix a small type mismatch through a code action.
+6. Debug the greeting request and inspect its name parameter.
+7. Read :JdtShowLogs without clearing the workspace.
+
+10. ADVANCED FEATURES AND LIMITS
+----------------------------------------------------------------
+Remote attach is configured at 127.0.0.1:5005. Start the app with a suitable
+JDWP option, such as -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,
+then choose Debug (Attach) - Remote. Attach and automatic hot code replace
+are configured but NOT TESTED in this migration.
+No Spring bean window or integrated HTTP client is configured.
+Dadbod SQL access is available through <leader>D; database connections
+need separate setup and were not tested.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help jdtls       :help dap       :help lsp
+  https://github.com/mfussenegger/nvim-jdtls
+  https://github.com/eclipse-jdtls/eclipse.jdt.ls
+08_GO_GIN.txt covers the Go alternative. 10_TEST_DEBUG.txt has shared controls.
+14_TROUBLESHOOTING.txt covers logs and cache recovery.
+Verification details: VERIFICATION.txt. Gradle and desktop F keys are NOT TESTED.

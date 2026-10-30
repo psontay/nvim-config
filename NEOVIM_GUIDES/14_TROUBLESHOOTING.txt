@@ -1,0 +1,193 @@
+================================================================
+14_TROUBLESHOOTING — DIAGNOSE, CHECK, UPDATE, AND RECOVER
+================================================================
+<leader> is Space. Commands are labeled by component where it matters.
+Use this when startup, help, mappings, LSP, formatting, tests, or debugging fails.
+Current verification results and limits are in VERIFICATION.txt.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Troubleshooting separates the editor, plugins, external tools, and project.
+A narrow check helps you fix the failing part while preserving working tools.
+The configuration is an existing LazyVim setup. Reinstalling it is not a
+normal first response to a missing key or a Java import error.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use these checks after a visible failure or an intentional configuration
+update. Start with messages and the affected buffer. Reproduce one problem
+before changing several settings at once.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Identify the layer:
+  nvim --clean file.go       checks native Neovim without this configuration
+  :messages                 shows recent messages [NATIVE]
+  :Lazy                     shows plugin status [PLUGIN]
+  <leader>cl                shows LSP details [PLUGIN]
+  :checkhealth vim.lsp      checks Neovim LSP [NEOVIM]
+  :Mason                    shows installed language/debug/format tools [PLUGIN]
+  go build ./... or Maven/Gradle test outside Neovim checks the project itself.
+
+Startup:
+  nvim --version
+  nvim --headless +qa
+  nvim --startuptime /tmp/nvim-startup.log +qa
+  Read the whole error output. A piped head command can hide a failure or
+  mask the editor's exit status.
+  :echo stdpath('config') and :echo stdpath('data') show active paths.
+  :Lazy profile helps locate slow plugins. No fixed startup time is promised.
+
+Help and mappings:
+  :KeyHelp e                explain e [CUSTOM]
+  :KeyHelp ciw              explain a sequence [CUSTOM]
+  :KeyHelp                  open search, then type delete or window [CUSTOM]
+  :KeyHelp level 2           open a learning level [CUSTOM]
+  :KeyHelp docs / :KeyHelp guides open existing documentation menus [CUSTOM]
+  <leader>hm lists active mappings; <leader>? shows buffer-local hints.
+  :verbose nmap <leader>hh  inspect the Normal Mode mapping's source
+  :verbose imap <C-k>       inspect Insert Mode overrides
+  Native built-ins often have no explicit mapping. "No mapping found" does
+  not mean a native command is missing.
+  Insert Ctrl-k must remain digraph input. The disabled blink override is
+  in lua/plugins/lsp.lua. Do not remap a native key just to match a guide.
+  If guide search fails, open directly:
+    :e ~/.config/nvim/NEOVIM_GUIDES/00_INDEX.txt
+  Inspect :messages and confirm the file exists and Snacks loaded.
+  If a plugin help tag is missing, load that plugin through its normal feature
+  first (for example, open a Java file for jdtls). Native help is always available.
+
+LSP:
+  :set filetype? confirms go or java. Open a valid module/build project.
+  Use <leader>cl to inspect server name, root, and capabilities.
+  :lsp restart restarts LSP clients [NEOVIM 0.12].
+  For logs: :lua vim.cmd.edit(vim.lsp.log.get_filename())
+  :lua vim.lsp.log.set_level('DEBUG') enables detailed logging temporarily;
+  return it to 'WARN' after reproducing the issue.
+
+Go:
+  Check go version and go env GOPATH GOROOT GOFLAGS GOTOOLCHAIN in the
+  shell that starts Neovim. Check gopls in :Mason.
+  gopls needs module/workspace context. A Go workspace root is not always
+  a runnable package; use an explicit <leader>rc command when needed.
+  golangci-lint is conditional on an ancestor .golangci config and executable.
+  Check project dependency/network errors before changing caches.
+
+Java:
+  Wait for import. Inspect :JdtShowLogs and :JdtUpdateConfig.
+  Launcher JDK must satisfy this jdtls setup; the helper chooses >=21.
+  The project's required JDK must also be installed and correctly declared.
+  Build tools inherit the shell JDK, which can differ from jdtls' launcher.
+  Check dependency repository/proxy errors outside the editor as well.
+  :JdtRestart is narrower than deleting caches.
+  :JdtWipeDataAndRestart clears this project's jdtls workspace and reimports;
+  use it after inspecting logs and simpler refresh attempts.
+  :JdtUpdateDebugConfig refreshes missing launch choices after import.
+  Gradle integration is configured but was not executed during this migration.
+
+4. IMPORTANT FORMAT, DEBUG, AND HEALTH COMMANDS
+----------------------------------------------------------------
+  :ConformInfo       configured formatter and its log [PLUGIN]
+  :LazyFormatInfo    formatter selection and autoformat state [PLUGIN]
+  <leader>uF         toggle buffer format-on-save [PLUGIN]
+  <leader>uf         toggle global format-on-save [PLUGIN]
+  :DapShowLog        debugger log [PLUGIN]
+  :DapSetLogLevel TRACE detailed debugger log [PLUGIN]
+  :DapTerminate      terminate a debug session [PLUGIN]
+  :checkhealth vim.provider clipboard/provider checks [NEOVIM]
+  :checkhealth vim.treesitter parser checks [NEOVIM]
+  :Inspect / :InspectTree inspect syntax information [NEOVIM]
+
+Go uses goimports for manual save formatting. Java intentionally does not
+format on save. Auto-save skips formatting in every eligible buffer.
+For a temporary editing experiment that must never auto-write, use :enew
+with no file name. Toggling auto-save alone is insufficient: autowrite and
+autowriteall are also enabled. Temporary :set noautowrite noautowriteall
+and :ASToggle can be used together, then restored deliberately.
+A missing optional lazygit or a disabled provider is not automatically the
+cause of an unrelated LSP failure. Read the affected component's health output.
+
+5. PRACTICAL VERIFICATION AND MAINTENANCE
+----------------------------------------------------------------
+From ~/.config/nvim, run:
+  nvim --headless -c 'luafile scripts/check-english-help.lua'
+  KEYHELP_FILES="/absolute/demo/main.go /absolute/demo/App.java" \
+    nvim --headless -c 'luafile scripts/check-keyhelp.lua'
+  KEYHELP_FILES="/absolute/demo/main.go /absolute/demo/App.java" \
+    nvim --headless -c 'luafile scripts/check-guides.lua'
+  python3 scripts/check-learning-content.py
+
+Use Go and Java files in real build projects. Include a tracked Git file
+for gitsigns. KEYHELP_FILES uses whitespace-separated paths; avoid spaces
+in fixture paths. Missing contextual mappings without those files are not
+proof of a configuration regression. Tests must attach initialized servers.
+
+Generation:
+  nvim --headless -l scripts/gen-keymaps-doc.lua
+  KEYHELP_FILES="/absolute/demo/main.go /absolute/demo/App.java" \
+    nvim --headless -c 'luafile scripts/gen-keymaps-txt.lua'
+
+Edit KeyHelp's source data rather than generated tables. Update the
+English generator text when needed. Regenerate only affected tables.
+Guide dependencies:
+  search/picker -> 04, 06       LSP/completion -> 07, 08, 09
+  runner -> 08, 09, 12        test/debug -> 10 and language guides
+  Git -> 11                  clipboard/terminal -> 12
+  KeyHelp/navigation -> 00, 15 and the relevant guide
+Record per-file status, last check, and unresolved issues in MANIFEST.txt.
+Update version/lock stamps only after checking the changed dependencies.
+VERIFIED means documented checks passed; it does not claim every UI path ran.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+Do not delete ~/.local/share/nvim or all of ~/.cache/nvim as a routine fix.
+Those paths contain plugins, Mason tools, parsers, and project caches.
+Do not run updates just to explain a local keymap issue.
+:MasonUpdate refreshes the registry; it is not an update of every installed tool.
+Do not rerun a shell app and debugger on the same port without stopping one.
+A headless test cannot verify how Konsole renders or forwards shortcuts.
+
+7. RECOVERY AND ROLLBACK
+----------------------------------------------------------------
+For a bad config edit, restore the affected file from a reviewed backup.
+The pre-English archive and checksum are in:
+  ~/.config/nvim/.documentation-backups/20261029-191815/
+Extract to a separate review directory before replacing selected files.
+The original full backup remains at:
+  ~/nvim-backups/20261022-211315/
+Its RESTORE.sh moves current directories aside and restores its archives.
+Review it before running. It predates the guides; keep the new archive too.
+For plugin rollback, restore the intended lazy-lock.json, then :Lazy restore.
+:Lazy restore uses the current lockfile, which an update may have changed.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Read messages, identify the layer, reproduce, then change one thing.
+A lockfile records plugin commits; a backup records files you can recover.
+Documentation and tests should describe current evidence, not past claims.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Inspect :messages, :Lazy, and <leader>cl in a working project.
+2. Look up a native key and a custom key with :verbose nmap.
+3. Open the guide index directly, then through :KeyHelp guides.
+4. Run the help and content checks. Read any contextual-mapping failures.
+5. Inspect backup filenames and checksums without performing a restore.
+6. Read VERIFICATION.txt and identify which checks still need Konsole.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+Use NVIM_APPNAME for a separate test setup when intentionally testing a new
+configuration. It changes config/data/state paths; it is not needed to
+translate this setup. For repeatable sandbox checks, use copied tool data,
+/tmp state/cache, and disposable project copies. Disable automatic registry
+refresh only in a test wrapper when network access is unavailable; record
+that difference instead of changing the user's live configuration.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help health        :help --clean    :help NVIM_APPNAME
+  :help :lsp          :help :verbose   :help startup-options
+README.md describes architecture and backups. MANIFEST.txt records progress.
+VERIFICATION.txt distinguishes PASS, FAIL, NOT TESTED, and BLOCKED.
+Official docs: https://neovim.io/doc/user/ and installed plugin documentation.

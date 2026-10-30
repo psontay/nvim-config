@@ -1,0 +1,166 @@
+================================================================
+01_SURVIVAL — MODES, OPEN, SAVE, QUIT, AND RECOVERY
+================================================================
+Start here. Press keys from Normal Mode unless another mode is named.
+[NATIVE] = Vim/Neovim. [NEOVIM] = Neovim-specific. [PLUGIN] = a plugin
+or LazyVim. [CUSTOM] = this configuration. <leader> means Space.
+<C-x> means hold Ctrl and press x. <CR> means Enter.
+Quick help [CUSTOM]: :KeyHelp i, <leader>h1, <leader>hh.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Neovim is a modal editor: the same key has different jobs in each mode.
+Use Normal Mode to move and edit. Use Insert Mode to type new text.
+This makes small edits easy to repeat without reaching for the mouse.
+
+Normal Mode       Move, delete, copy, paste, or start a command.
+Insert Mode       Type text. Start with i, a, I, A, o, or O.
+Visual Mode       Select text, then apply an action.
+Command-line Mode Enter a command with :, or search with / or ?.
+Operator-pending  After an Operator such as d, choose the text to act on.
+Terminal Mode     Send keys to a shell or program inside Neovim.
+
+The statusline shows the mode. A Buffer holds an opened file's text.
+A Window shows a Buffer. These are explained in 05_BUFFERS_WINDOWS.txt.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Return to Normal Mode after typing. Start a new Insert action for the
+next change. If you are unsure of the mode, press Esc. Inside a terminal,
+use Ctrl-\ then Ctrl-n to return to Normal Mode instead.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Enter Insert Mode [NATIVE]:
+  i   before the cursor         a   after the cursor
+  I   first non-blank character A   end of line
+  o   new line below            O   new line above
+  Esc or Ctrl-[ returns to Normal Mode.
+  Ctrl-w deletes the previous word while typing. Ctrl-u deletes back
+  toward the line start; its range depends on where insertion began.
+  Ctrl-o runs one Normal Mode command, then returns to Insert Mode.
+
+Select text [NATIVE]:
+  v selects characters. V selects lines. Ctrl-v selects a block of columns.
+  Move to extend the selection. Then y copies, d deletes, c changes,
+  > indents, or Esc cancels. gv selects the last selection again.
+
+Open a file:
+  Shell: nvim main.go
+  :e internal/handler/user.go        [NATIVE]
+  Space twice, type a file name, Enter [PLUGIN: Snacks picker]
+  <leader>fr finds recent files. nvim . opens the explorer [PLUGIN].
+
+Save:
+  :w saves. :w new-name writes a copy under another name. [NATIVE]
+  :saveas new-name writes and switches to that name. [NATIVE]
+  Ctrl-s saves in Normal and Visual Mode. [PLUGIN]
+  In Insert Mode, Ctrl-s shows a function signature. [NEOVIM]
+  Manual save formats Go through goimports. Java does not format on save.
+
+Auto-save [PLUGIN + CUSTOM]:
+  Writes eligible file buffers after editing, with a one-second delay
+  for deferred events. It also writes when leaving a buffer or losing
+  focus. It does not format. <leader>uv or :ASToggle toggles it.
+  autowrite and autowriteall are also enabled. Some commands can save
+  files even if the auto-save plugin is off. See 14_TROUBLESHOOTING.txt.
+
+Quit [NATIVE unless marked]:
+  :q       close this window; quit if it is the last one
+  :wq      write, then close
+  :x or ZZ write if changed, then close
+  :q! / ZQ close and discard changes that are STILL UNSAVED
+  :qa      quit all windows
+  <leader>qq also quits all windows. [PLUGIN]
+  confirm is enabled, so some commands ask how to handle unsaved changes.
+
+Undo [NATIVE]:
+  u undoes a change. Ctrl-r redoes it. 5u undoes five changes.
+  Persistent undo keeps history across sessions when its file is writable.
+  :earlier 10m goes back ten minutes in the edit history.
+  :later 5m moves forward five minutes. Inspect the result before saving.
+  <leader>su opens an undo tree with previews. [PLUGIN]
+
+4. IMPORTANT KEYS
+----------------------------------------------------------------
+  Esc            leave Insert/Visual Mode; cancel a pending command
+  Esc in Normal  clear search highlights [PLUGIN]
+  yy / dd        copy / cut a whole line [NATIVE]
+  p / P          put after / before; linewise text goes below / above
+  x              delete one character [NATIVE]
+  :              start a command; Enter runs it; Esc cancels it
+  :Tutor         open the official interactive lesson [NEOVIM]
+  <leader>ht     open Tutor [CUSTOM]
+  <leader>hd     open configuration documents [CUSTOM]
+  <leader>hg     pick a learning guide [CUSTOM]
+
+Interactive sessions normally use the system clipboard through unnamedplus.
+Clipboard tools and the Wayland session must be available. See
+12_TERMINAL_CLIPBOARD.txt for explicit "+y and "+p commands.
+
+5. PRACTICAL EXAMPLE
+----------------------------------------------------------------
+Use a scratch buffer so auto-save cannot change a real project:
+  :enew
+  iHello, Neovim!<Esc>
+  A I am learning Vim.<Esc>
+  u                 undo the second insertion
+  Ctrl-r            redo it
+  yy then p         copy and put the whole line below
+  :w /tmp/nvim-survival.txt
+  :q
+For Go, o can add a comment below a function. For Java, O can add a comment
+above a method. Return with Esc before running another command.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+Typing commands while in Insert Mode inserts letters. Typing prose in
+Normal Mode can run commands. Check the mode and undo accidental edits.
+A new unnamed buffer needs a name: use :w /tmp/example.txt.
+q starts Macro recording. If the statusline shows recording, press q
+in Normal Mode to stop. q is not the universal quit key.
+U changes a whole line's undo state; use lowercase u for normal undo.
+
+7. RECOVERY
+----------------------------------------------------------------
+  Accidental edit       u, then inspect the result
+  Change already saved  u still works; :q! cannot remove saved edits
+  Need an older state   <leader>su or :earlier 10m
+  Wrong popup           Esc; a help detail window also accepts q
+  Frozen terminal input Ctrl-q may resume software flow control
+  Startup error         nvim --clean; then read 14_TROUBLESHOOTING.txt
+
+:e! reloads the last saved version and discards unsaved changes. With
+auto-save, that saved version may already include the mistake. Inspect
+Git diff or undo history before replacing a file.
+After a crash, use the swap recovery prompt. Review recovered text before
+saving. Do not delete a swap file while another Neovim is editing the file.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+i = insert. a = append. o = open a line. u = undo. Ctrl-r = redo.
+Use small Insert actions. They make undo and dot repeat easier to predict.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open :enew. Type three lines using i, o, and O.
+2. Select two lines with Vj, copy with y, and put with p.
+3. Undo, redo, and explain what each action changed.
+4. Save only to /tmp/nvim-survival.txt.
+5. Open :Tutor and finish its first lesson.
+6. Reopen the scratch file and try :q, :wq, ZZ, and ZQ separately.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+Ctrl-r followed by a Register name inserts its text in Insert Mode.
+Ctrl-o zz centers the current line without leaving Insert Mode for long.
+Registers and Macros: 13_ADVANCED_VIM.txt.
+Sessions and splits: 05_BUFFERS_WINDOWS.txt.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help modes              :help :write       :help :quit
+  :help undo-tree          :help 'undofile'   :help i_CTRL-U
+  :help usr_02.txt
+Next: 02_MOVEMENT.txt and 03_EDITING.txt.
+Verification details: VERIFICATION.txt. Real Konsole rendering is NOT TESTED.

@@ -1,0 +1,146 @@
+================================================================
+12_TERMINAL_CLIPBOARD — SHELL COMMANDS, COPY, AND PASTE
+================================================================
+<leader> is Space. [NATIVE] = Vim/Neovim; [NEOVIM] = Neovim-specific;
+[PLUGIN] = Snacks/LazyVim; [CUSTOM] = local runner; [TERMINAL] = desktop app.
+Desktop context: Fedora, KDE Plasma, Wayland, Konsole.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+An embedded terminal runs a shell inside a Neovim buffer. Terminal Mode
+sends keys to that program. Normal Mode lets you search and copy its output.
+The clipboard shares text with other applications. Registers hold text
+inside Vim; some Registers connect to the system clipboard.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use the runner for build/test/app commands. Use a floating terminal for
+short interactive work. Use :! for one-shot commands and :read for output
+you want to insert. Use explicit clipboard Registers when sharing code.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Snacks terminal [PLUGIN]:
+  Ctrl-/ toggles the root terminal. Ctrl-_ is also mapped for terminal encodings.
+  <leader>ft opens a root terminal; <leader>fT uses cwd.
+  While in Terminal Mode, type shell commands normally.
+  Ctrl-\ then Ctrl-n enters Normal Mode [NATIVE].
+  Two quick Esc presses also leave Terminal Mode [PLUGIN; timing-sensitive].
+  In terminal Normal Mode, / searches, y copies, and gg/G navigates output.
+  i or a resumes terminal input. q hides a Snacks terminal window.
+  Hiding it does not stop its program. Ctrl-c while sending input normally
+  interrupts the foreground program. exit ends a shell.
+  To move to code, leave Terminal Mode, then use Ctrl-w k.
+
+Runner [CUSTOM]:
+  <leader>rr run; <leader>rb build; <leader>rt test.
+  <leader>rc custom command; <leader>rl repeat the previous command and cwd.
+  Its terminal opens below and leaves focus in code. Move with Ctrl-w j.
+  It starts in Normal Mode; press i before sending Ctrl-c or other shell input.
+
+Native terminal [NEOVIM]:
+  :terminal opens a terminal in the current window.
+  :split | terminal opens one in a new horizontal split.
+  Native terminal buffers do not automatically have every Snacks-local key.
+  Stop the shell, then close its buffer deliberately with :bd.
+
+Shell commands [NATIVE]:
+  :!git status -sb       run once and show output
+  :!go test ./...        run synchronously; a terminal suits long jobs better
+  :read !date           insert command output below this line
+  :%!sort               replace all buffer text with sorted output
+  :%!jq .               format JSON if jq is installed
+  :!!                   repeat the last shell command
+  Shell filters replace text. Use u to undo a mistaken filter result.
+
+4. IMPORTANT CLIPBOARD REGISTERS
+----------------------------------------------------------------
+Register: a named place holding text. Prefix an action with " plus its name.
+  yy / p    normal yank / put [NATIVE]
+  "+y / "+p explicit system clipboard yank / put [NATIVE; provider required]
+  "0p       put the last yank; deletes do not replace Register 0
+  "_dd      delete a line into the black hole Register, preserving saved text
+  "ap       put from named Register a; "ayy yanks a line into it
+  :reg      inspect Registers; <leader>s" opens a picker [PLUGIN]
+  Insert Ctrl-r + inserts clipboard text; Ctrl-r 0 inserts the last yank.
+  "+ and "* are different Registers: clipboard and PRIMARY selection.
+  PRIMARY behavior depends on the compositor and is NOT TESTED here.
+
+In local interactive sessions, LazyVim sets clipboard=unnamedplus, so
+ordinary y/d/c/x can write to the clipboard and p/P can read it.
+When SSH_CONNECTION is present, that default is disabled.
+Wayland sharing needs a working wl-copy/wl-paste provider and display access.
+Check :set clipboard? and :checkhealth vim.provider.
+Clipboard behavior in a sandbox/headless process does not prove desktop behavior.
+
+Useful commands [NATIVE]:
+  :let @+ = expand('%:p') copies the full current file path.
+  :let @+ = expand('%:.') copies the path relative to cwd.
+  "0p recovers the last yank after an ordinary delete replaced the clipboard.
+  gx opens a URL with a system app [NEOVIM]. <leader>gY copies a repository
+  URL for a line/selection when repository web browsing is supported [PLUGIN].
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go/Gin: start <leader>rr. In another terminal, call localhost:8088/ping.
+Read logs below. Move there, press i, and Ctrl-c to stop the app.
+Java: run tests with <leader>rt and search the terminal output for ERROR
+from Normal Mode. Return to code with Ctrl-w k.
+Copy a function with yaf [PLUGIN Text Object], then paste into an external
+app. For the reverse direction, use "+p in Normal Mode.
+
+6. COMMON MISTAKES AND DESKTOP KEYS
+----------------------------------------------------------------
+If letters move the terminal cursor instead of reaching the shell, press i.
+Ctrl-w movement in Terminal Mode may be sent to the program. Leave that mode first.
+q hides a Snacks terminal; it does not terminate the app.
+A delete can replace the clipboard. Use "_d when you want to keep it.
+Konsole commonly uses Ctrl-Shift-C/V for copy/paste and Ctrl-Shift-T/W for
+tabs. Check its actual shortcuts; they are outside Neovim's mapping table.
+KDE can intercept function-key combinations before Neovim receives them.
+F7/F8/F9 and Shift-F8 are configured for debugging, but delivery is NOT TESTED.
+Alt-j/k can also depend on the terminal. Use existing alternative mappings.
+
+7. RECOVERY
+----------------------------------------------------------------
+Ctrl-\ Ctrl-n leaves Terminal Mode. Ctrl-c in terminal input interrupts
+most foreground commands. Do not assume it reverses changes a command made.
+Ctrl-q may resume a terminal paused by software flow control (XOFF).
+u undoes text pasted into a normal file buffer.
+For clipboard failure, inspect provider health, WAYLAND_DISPLAY, and
+SSH_CONNECTION. Test wl-copy/wl-paste in a real desktop terminal if needed.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Terminal Mode types to a program; Normal Mode reads its buffer.
+Ctrl-\ Ctrl-n returns control to Neovim. i sends input again.
+0 keeps the last yank; _ discards deleted text; + is the clipboard.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open the floating terminal and run pwd.
+2. Enter Normal Mode, search output, copy a line, then return with i.
+3. Hide and reopen it. Confirm the shell session remains.
+4. In :enew, try :read !date, then undo.
+5. Yank a word, delete another line, and compare p with "0p.
+6. Repeat with "_dd and observe that saved text is preserved.
+7. On the real desktop, test both directions of clipboard sharing.
+8. Stop each practice app before closing the terminal window.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+Visual block editing can avoid repeated pasting; see 03_EDITING.txt.
+Mouse selection may be handled by Neovim because mouse=a. Holding Shift
+while selecting can let Konsole handle the mouse instead, depending on its
+settings. This, bracketed paste, and PRIMARY selection need desktop checks.
+For a key encoding, Insert Ctrl-v followed by a key can reveal its input.
+Digraph entry is Insert Ctrl-k followed by two characters [NATIVE].
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help terminal-input   :help provider-clipboard   :help registers
+  :help 'clipboard'      :help :!                   :help :read
+Installed Snacks docs/terminal.md and Konsole's handbook describe their controls.
+08_GO_GIN.txt, 09_JAVA_SPRING.txt, and 10_TEST_DEBUG.txt cover programs to run.
+Verification details: VERIFICATION.txt; desktop clipboard, mouse, key delivery,
+and terminal rendering are NOT TESTED in this migration.

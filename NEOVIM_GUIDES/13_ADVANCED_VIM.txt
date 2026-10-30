@@ -1,0 +1,165 @@
+================================================================
+13_ADVANCED_VIM — REGISTERS, MACROS, MARKS, AND EX COMMANDS
+================================================================
+Start after 01_SURVIVAL.txt through 04_SEARCH_REPLACE.txt.
+Commands here are [NATIVE] unless marked [NEOVIM], [PLUGIN], or [CUSTOM].
+<leader> is Space. <leader>h4 opens this learning level [CUSTOM].
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+A Register holds text or recorded commands. A Macro is a recorded key
+sequence. A Mark names a position. Ex commands are commands entered after
+:. Together they let you repeat edits, keep several pieces of text, and
+apply actions to lines chosen by a pattern.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use dot for one repeated change, cgn for search matches, and a Macro for
+several steps. Use :g to choose lines by content. For a code symbol across
+files, prefer LSP rename. These tools change text without understanding
+whether two identical names refer to the same symbol.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Registers:
+  "ayiw yanks a word into a; "ap puts it. "Ayy appends a line to a.
+  "0 contains the last yank; deletes do not replace it.
+  "1 through "9 hold recent line/large deletions when available.
+  "_ discards deleted text. "+ connects to the clipboard provider.
+  "/ holds the last search; ": the last Ex command; ". the last inserted text.
+  :reg a b shows Registers a and b. :reg shows them all.
+  <leader>s" opens the Register picker [PLUGIN].
+  In Insert Mode, Ctrl-r then a Register name inserts its contents.
+  In Command-line Mode, Ctrl-r Ctrl-w inserts the word under the cursor.
+  Interactive unnamedplus can make ordinary deletes replace the clipboard.
+  Use "_dd to delete without losing it; use "0p for the last yank.
+
+Macros:
+  qa starts recording into a. Run commands, then q stops recording.
+  @a plays it; @@ repeats the last executed Macro; 5@a plays five times.
+  Q plays the last recorded Macro [NEOVIM]. qA appends more recording to a.
+  Start at a stable position such as 0 or ^. Finish with j if the next
+  repetition should act on the next line. A failed Motion can stop playback.
+  A Macro is Register text. :let @a='0dw' replaces it with a simple sequence.
+  "ap puts its text for inspection; edit it and yank it back if needed.
+  If you use "ayy to rebuild a Macro, note that a linewise yank adds a newline.
+  Test the result once before running it on many lines.
+
+Marks:
+  ma sets Mark a in this file. mA sets a Mark that can point across files.
+  'a goes to its line; `a goes to the exact column.
+  `. is the last change; `^ the last Insert stop; `[ and `] bracket a change/yank.
+  :marks lists Marks; :delmarks a removes one.
+  Use mS in a service and mC in a controller, then 'S and 'C to move between them.
+  Marks persist through ShaDa when normal state storage is available.
+
+4. IMPORTANT EX AND REPEAT COMMANDS
+----------------------------------------------------------------
+A range chooses lines: 1,5; .,$; %; or '<,'> for a Visual-selected line range.
+  :g/TODO/d             delete matching lines
+  :v/ERROR/d            delete non-matching lines, keeping ERROR lines
+  :g/^$/d               delete empty lines
+  :g/./normal A;        append ; to every non-empty line
+  :2,4normal Ix         insert x at the start of lines 2 through 4
+  :%normal A,           append a comma to every line
+  :sort u               sort the range and remove duplicates
+  :sort n               sort using numeric values
+  :g/TODO/y A           append matching lines to Register a
+
+:normal uses mappings; :normal! bypasses them. For Macro playback, use
+:normal @a, since ! would also bypass mapped keys inside the Macro.
+Literal <Esc> written as text in :normal is not an Escape key. To include
+special keys, use :execute with key notation:
+  :execute "normal! A;\<Esc>"
+For :normal with an unfinished Insert action, the command ends Insert Mode
+automatically after its supplied keys. Keep the sequence simple and test it.
+
+Run over a scope:
+  :bufdo command  listed buffers     :windo command current tab's windows
+  :tabdo command tab pages          :argdo command argument-list files
+  :cdo command   quickfix entries    :cfdo command each quickfix file
+Commands such as update save text. Auto-save can also write as buffers change.
+Do multi-file practice in a disposable copy; see 04_SEARCH_REPLACE.txt.
+
+Substitution tools:
+  :%s/foo(\(\d\))/bar[\1]/g    foo(1) becomes bar[1]
+  :s/b/\r/                      replace b with a line break
+  :s/\w\+/\u\L&/g               capitalize each matched word
+  :%s/\d\+/\=submatch(0)+1/g     increase every matched number
+In replacement text, \1 is a captured group, & is the whole match, and
+\r inserts a line break. \n in a pattern matches a line break; it is not
+the replacement newline syntax. Check :help sub-replace-special.
+
+cgn and dot:
+  Search /id<CR>. cgnnewID<Esc> changes the current or next match.
+  Dot changes another match. n can skip ahead without changing.
+  gn includes a match already under the cursor. If you start with *, it
+  moves to another occurrence first; N can return before the first change.
+  No multiple-cursor plugin is needed for this sequence.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Scratch lines a, b, c, d:
+  qaA!<Esc>jq2@a adds ! to the first three lines, leaving d unchanged.
+Select several @GetMapping lines in copied Java text or collect them with
+:g/@GetMapping/y A after clearing Register a with qaq.
+For a simple Java text change:
+  :%s/System\.out\.println(/log.info(/gc
+This only edits text. It does not add imports or check logger types.
+For Go struct tags, use precise edits or available code actions rather than
+assuming a broad regex handles every type and existing tag correctly.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+An absolute column in a Macro may be wrong on a shorter line.
+A search in a Macro changes search state and may wrap unexpectedly.
+:g uses a pattern to choose lines, then runs an Ex command. For deletion,
+:g/pattern/d is clearer than combining a delete Macro with moving lines.
+Writing literal <CR> or <Esc> in a Register does not create those special keys.
+Register 0 is protected from deletes; the unnamed Register is not.
+cgn can change a match under the cursor, not only one after it.
+
+7. RECOVERY
+----------------------------------------------------------------
+Stop recording with q. Stop unwanted playback with Ctrl-c when possible.
+u undoes changes, but Macro playback can create several undo steps.
+Do not assume one undo reverses every Macro or multi-file command.
+Use <leader>su [PLUGIN] or :earlier to inspect older states.
+:e! returns only to the last save, which may already include auto-save edits.
+Review Git diff before restoring specific files.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+q records; @ runs. Uppercase Register names append.
+:g is global line selection; :v selects the inverse.
+A useful Macro has a predictable start and end position.
+
+9. PRACTICE
+----------------------------------------------------------------
+Use :enew rather than real code.
+1. Yank different lines into a and b; inspect :reg a b and put both.
+2. Record a Macro that appends ! and moves down. Run it once, then twice.
+3. Try :g/TODO/d on mixed scratch lines, then undo.
+4. Try :v/ERROR/d and explain what remains.
+5. On three id matches, use cgn, dot, and n. Undo afterward.
+6. Sort duplicate lines with :sort u.
+7. Select three lines containing 1, then g Ctrl-a to produce 2, 3, 4.
+8. Set a Mark, jump away, and compare 'a with `a.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+q: opens command history for native editing; Enter executes the line;
+:q closes it. q/ and q? edit search history. Ctrl-f opens this window while
+typing a command. @: repeats the last Ex command.
+<leader>: opens command history and <leader>s/ search history [PLUGIN].
+Filters such as !ip sort replace a text unit with shell output.
+:command! GoTidy !go mod tidy defines a session-local command; this guide
+does not add it to your configuration or create new keymaps.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help registers   :help recording   :help Q   :help mark-motions
+  :help :global     :help :normal     :help gn  :help cmdwin
+  :help sub-replace-special           :help :sort
+03_EDITING.txt covers Text Objects; 04_SEARCH_REPLACE.txt covers ranges and quickfix.
+Verification details: VERIFICATION.txt. Desktop Macro/history interaction is NOT TESTED.

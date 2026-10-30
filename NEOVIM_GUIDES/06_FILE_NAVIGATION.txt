@@ -1,0 +1,144 @@
+================================================================
+06_FILE_NAVIGATION — FIND PROJECT FILES AND SYMBOLS
+================================================================
+<leader> is Space. [NATIVE] = Vim/Neovim. [PLUGIN] = plugin/LazyVim.
+This setup uses Snacks picker and explorer, with ripgrep and fd.
+Telescope, neo-tree, Harpoon, and Oil are not configured.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+A picker is a list you filter by typing. Fuzzy search matches characters
+in order without requiring a complete name. The explorer shows folders.
+Use the picker for speed and the explorer to understand project structure.
+A symbol is a named code item, such as a class, method, or function.
+Symbol pickers need an attached Language Server.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+  Know a file name       Space twice [PLUGIN]
+  Know text inside it    <leader>/ [PLUGIN]
+  Know a symbol name     <leader>sS [PLUGIN + LSP]
+  Need the current file's structure <leader>ss or <leader>cs [PLUGIN]
+  Opened it recently     <leader>fr or <leader>, [PLUGIN]
+  Need to browse folders <leader>e [PLUGIN]
+  Need to return         Ctrl-o [NATIVE]
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Start at the project root:
+  cd ~/Workspace/Vim/go-gin-demo && nvim
+  nvim . opens the explorer. Opening a specific file starts its filetype tools.
+  Use :pwd to see cwd, the current working directory.
+  LazyVim normally uses LSP roots, then a Git root, then cwd.
+  Without LSP, a go.mod or pom.xml alone is not a separate LazyVim root rule.
+  Check :LazyRoot when the search scope is surprising.
+
+File pickers [PLUGIN]:
+  <leader><space> or <leader>ff searches files at the project root.
+  <leader>fF uses cwd. <leader>fg lists Git files.
+  <leader>fr shows recent files; <leader>fR limits recent files to cwd.
+  <leader>, or <leader>fb shows opened buffers.
+  <leader>fc searches Neovim configuration files.
+  <leader>fp picks a recent project. <leader>fn opens a new unnamed buffer.
+
+Picker controls [PLUGIN, while the picker is active]:
+  Type part of a name; Enter opens the selected result.
+  Ctrl-j / Ctrl-k or Ctrl-n / Ctrl-p selects a result.
+  Ctrl-v opens a vertical split; Ctrl-s a horizontal split; Ctrl-t a tab.
+  Tab selects multiple items; Ctrl-q sends results to quickfix.
+  Alt-h toggles hidden files; Alt-i toggles ignored files.
+  Alt-p toggles preview. Ctrl-f / Ctrl-b scrolls the preview.
+  Press Esc to leave input or close. ? in Normal Mode shows picker help.
+  Do not assume normal editor meanings inside a picker input window.
+
+Explorer [PLUGIN]:
+  <leader>e opens the root explorer; <leader>E uses cwd.
+  <leader>fe and <leader>fE are equivalent file-group mappings.
+  In the explorer's Normal Mode:
+    j/k move; l or Enter opens; h closes a folder; Backspace goes up.
+    a creates a file or folder. End a new folder name with /.
+    r renames; c copies; m moves; d deletes.
+    y yanks a file path for explorer operations; p pastes copied files.
+    H toggles hidden files; I toggles ignored files; u refreshes.
+    . makes this directory the explorer root; ? shows available actions.
+    q closes the explorer. <leader>e also toggles it.
+  File operations affect the filesystem. Use disposable files for practice.
+  A trash command may be available; do not assume a deleted file is recoverable.
+
+4. IMPORTANT SYMBOL AND HISTORY KEYS
+----------------------------------------------------------------
+  <leader>ss  symbols in this file [PLUGIN + LSP]
+  <leader>sS  workspace symbols [PLUGIN + LSP]
+  gO          file symbols [NEOVIM]
+  <leader>cs  symbol outline through Trouble [PLUGIN]
+  <leader>cS  LSP lists through Trouble [PLUGIN]
+  <leader>sj  jump list picker [PLUGIN]
+  <leader>sm  Marks picker [PLUGIN]
+  <leader>sR  resume the last picker [PLUGIN]
+  <leader>sk  active mappings [PLUGIN]
+  <leader>sC  available commands [PLUGIN]
+  <leader>sh  help topics [PLUGIN]
+  gf          open the file named under the cursor [NATIVE]
+  gx          open a URL or path with a system app [NEOVIM]
+  Ctrl-g      show file name and position [NATIVE]
+  :echo expand('%:p') shows the full file path [NATIVE].
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go: press Space twice and type handler/user. Open user.go. Then use
+<leader>sS to find GetUser across the workspace, or <leader>ss in this file.
+Java: type GreetingController in the file picker. Find greet with the
+symbol picker after jdtls has imported the project. Use <leader>e to
+browse src/main/java and the package folders.
+A dependency definition opened with gd can live outside your project.
+Use Ctrl-o to return rather than searching for the original file again.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+The root picker and cwd picker may search different folders.
+Ignored build output, such as target/, is hidden until ignored files are enabled.
+Fuzzy search does not require adjacent characters, but their order matters.
+An empty symbol picker can mean Java is still importing, not that the file
+is missing. Inspect <leader>cl.
+d in the explorer deletes files. It does not merely close a buffer.
+A missing fzf program does not prevent Snacks from filtering its own lists.
+
+7. RECOVERY
+----------------------------------------------------------------
+Wrong file: Ctrl-^ returns to the alternate file; Ctrl-o returns after a jump.
+Wrong search: <leader>sR resumes the last picker.
+Wrong cwd: :cd - returns to the previous directory; :pwd checks it.
+Deleted tracked file: inspect Git status and any trash location before
+restoring selected content. Git cannot restore an untracked file it never saved.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Space-Space finds a file. Space-/ finds text.
+f = file. s = search. e = explorer. c = code.
+ss is this file's symbols; sS searches the workspace.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open a demo project with nvim . and browse with h/j/k/l.
+2. Close the explorer and find a controller or handler by a partial name.
+3. Open its service in a vertical split from the picker.
+4. Use <leader>ss, then <leader>sS, and compare scope.
+5. Jump to a library definition with gd and return with Ctrl-o.
+6. Create and rename only a disposable file under /tmp in the explorer.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+:find uses the native path option to locate files. gf also uses native
+file-name and path rules. :cd changes global cwd; :lcd changes a window's
+cwd; :tcd changes a tab's cwd. Root-aware plugin actions may still choose
+a project root. Check their labels before assuming the scope changed.
+Quickfix results and project text search: 04_SEARCH_REPLACE.txt.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help :edit       :help gf       :help :find
+  :help 'path'      :help :pwd     :help :lcd
+Installed Snacks docs/picker.md and docs/explorer.md describe plugin controls.
+05_BUFFERS_WINDOWS.txt explains buffer and layout navigation.
+07_LSP_COMPLETION.txt explains Language Server features.
+Verification details: VERIFICATION.txt; destructive explorer actions are NOT TESTED.

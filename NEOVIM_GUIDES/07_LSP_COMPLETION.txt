@@ -1,0 +1,155 @@
+================================================================
+07_LSP_COMPLETION — CODE HELP, NAVIGATION, AND REFACTORING
+================================================================
+<leader> is Space. [NATIVE] = Vim/Neovim; [NEOVIM] = Neovim-specific;
+[PLUGIN] = plugin/LazyVim; [CUSTOM] = this configuration.
+KeyHelp: :KeyHelp gd, :KeyHelp grr, :KeyHelp <leader>ca.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Language Server: a program that understands a programming language.
+LSP is the protocol Neovim uses to ask it for definitions, references,
+completions, diagnostics, and code changes. A diagnostic is an error,
+warning, or other message about code.
+This setup uses gopls for Go and jdtls through nvim-jdtls for Java.
+blink.cmp displays completion; conform.nvim handles configured formatters.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use LSP when reading unfamiliar code, finding an implementation, fixing
+an error, or renaming a symbol. Use text search for comments and strings.
+Many mappings appear only after a server attaches to the buffer and
+reports support for the feature. Plain text does not have these features.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Completion [PLUGIN: blink.cmp, enter preset]:
+  Type code or a trigger such as . to show the menu.
+  Ctrl-n / Ctrl-p or arrows chooses an item.
+  Enter or Ctrl-y accepts. Ctrl-e cancels the menu and its temporary insertion.
+  Ctrl-Space opens the menu or shows/hides completion documentation.
+  Ctrl-b / Ctrl-f scrolls completion documentation.
+  Tab / Shift-Tab moves between active snippet fields; otherwise it falls back.
+  Snippet: a code template with fields you fill in.
+  The configured selection can preselect and temporarily insert an item.
+  To insert a newline without accepting it, use Ctrl-e then Enter.
+  Sources include LSP, paths, snippets, and current buffer text.
+  Command-line completion has its own controls; Tab selects there.
+
+Signature and hover:
+  Insert Mode Ctrl-s shows parameter help [NEOVIM; explicit local callback].
+  gK shows it in Normal Mode [PLUGIN]. Blink also triggers signature help
+  while entering a call. K shows symbol documentation or type.
+  K is mapped by LazyVim and also has a Neovim LSP default. Press K again
+  to enter the documentation window when supported.
+  Insert Mode Ctrl-k is native digraph input. It is not signature help here.
+
+Navigation:
+  gd definition; gD declaration; gI implementation; gy type definition [PLUGIN].
+  grr references; gri implementations; grt type definitions [NEOVIM].
+  Multiple native results commonly go to quickfix; one result may jump directly.
+  <leader>cu opens references with previews [CUSTOM].
+  <leader>ci incoming calls (callers); <leader>cI outgoing calls [CUSTOM].
+  <leader>ss file symbols; <leader>sS workspace symbols [PLUGIN].
+  gO file symbols [NEOVIM]; <leader>cs outline through Trouble [PLUGIN].
+  ]] / [[ jumps between highlighted references [PLUGIN; server support needed].
+  Ctrl-o returns after a jump. The old gr mapping no longer blocks grr/grn/gra.
+
+Diagnostics:
+  ]d / [d next / previous message; ]e / [e errors; ]w / [w warnings [PLUGIN].
+  <leader>cd opens line details [PLUGIN]. Ctrl-w d is Neovim's diagnostic float.
+  <leader>sd lists workspace diagnostics; <leader>sD lists this buffer [PLUGIN].
+  <leader>xx and <leader>xX show Trouble for workspace and buffer [PLUGIN].
+  <leader>ud toggles diagnostics [PLUGIN].
+
+4. IMPORTANT CHANGE AND FORMAT KEYS
+----------------------------------------------------------------
+  grn                 rename a symbol [NEOVIM]
+  <leader>cr          rename a symbol [PLUGIN]
+  gra / <leader>ca    choose a code action or quick fix [NEOVIM / PLUGIN]
+  <leader>cA          whole-file source actions [PLUGIN]
+  <leader>co          organize imports in Go/Java [PLUGIN]
+  <leader>cf          format file or Visual selection [PLUGIN]
+  <leader>cF          format injected code when supported [PLUGIN]
+  <leader>uf          toggle global format-on-save [PLUGIN]
+  <leader>uF          toggle buffer format-on-save [PLUGIN]
+  <leader>uh          toggle supported inlay hints; off by default [PLUGIN]
+  <leader>cl          LSP information picker [PLUGIN]
+
+A code action is a server-provided change, such as adding an import or
+fixing a type. Available actions depend on the cursor, selection, and server.
+Inlay hints are extra parameter names or inferred types shown beside code.
+Go uses goimports on manual save. Auto-save skips formatting.
+Java saves without formatting. Use <leader>cf for its Eclipse formatter.
+A range format still needs language/formatter support; Go may format the
+whole file. Do not assume every formatter keeps changes within the selection.
+
+Java extras [PLUGIN: nvim-jdtls]:
+  <leader>cxv extracts a variable; <leader>cxc a constant.
+  In Visual Mode, <leader>cxm extracts a method.
+  <leader>cgs goes to a superclass method.
+  <leader>cgS goes from a test to its subject class.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go: on h.svc.GetUser, use gd to read the service, then Ctrl-o.
+On a repository interface, gI finds implementations.
+Type h.svc. to see completion, or use K on a library function.
+Java: use gI on greetingService.greet to find GreetingServiceImpl.
+Use grn to rename a method. Review the interface, implementation, calls,
+and tests with Git diff. LSP can change several buffers at once.
+A type mismatch may offer a quick fix through <leader>ca.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+Running gd before the server attaches produces no useful LSP result.
+Java may still be importing the project; check status and logs.
+Enter can accept completion instead of adding a newline.
+Text replacement can change unrelated names; LSP rename uses symbol meaning.
+Eclipse and IntelliJ formatters can produce different layouts.
+A Go file outside a module or Java file outside a build project has less context.
+
+7. RECOVERY
+----------------------------------------------------------------
+Undo a wrong code action in each affected buffer. Auto-save may have
+written the changes; saving does not remove undo history.
+For a formatting mistake, use u, inspect Git diff, then adjust autoformat.
+For a stuck server, inspect :checkhealth vim.lsp and :messages before
+:lsp restart. Java-specific commands are in 09_JAVA_SPRING.txt.
+Cancel completion with Ctrl-e; leave Insert Mode with Esc.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+c = code: ca action, cr rename, cf format, co organize, cd diagnostic.
+gd goes to a definition. gI finds an implementation. Ctrl-o returns.
+Lowercase i in ci is incoming; uppercase I in cI is outgoing in this setup.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open a Go demo handler and check <leader>cl for gopls.
+2. Use completion, K, gd, gI, grr, and Ctrl-o.
+3. In a disposable project copy, introduce a type error and read its diagnostic.
+4. Preview a code action. Undo any change you apply.
+5. Rename a Java method in a disposable copy; review all changed files.
+6. Toggle inlay hints and compare readability.
+7. Compare Go manual save formatting with Java manual formatting.
+
+10. ADVANCED FEATURES AND LIMITS
+----------------------------------------------------------------
+LSP folds use za/zc/zo; zR opens all; zM closes all [NATIVE fold commands].
+<leader>cc runs code lenses; <leader>cC refreshes them [PLUGIN]. A code lens
+is an action attached to a code location. Display is disabled by default.
+File rename <leader>cR is capability-dependent. The previous Go/Java dump
+had no mapping for it; do not assume it is available.
+Move-class and change-signature refactors are not configured IDE workflows.
+Use IntelliJ or GoLand when their refactoring tools better fit the job.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help lsp       :help lsp-defaults   :help diagnostic
+  :help i_CTRL-S  :help i_CTRL-K      :help fold-commands
+08_GO_GIN.txt and 09_JAVA_SPRING.txt cover language details.
+10_TEST_DEBUG.txt covers tests and debugging.
+Official references: https://neovim.io/doc/user/lsp/
+Installed blink.cmp and conform.nvim documentation describes plugin behavior.
+Verification details: VERIFICATION.txt; completion rendering is NOT TESTED.

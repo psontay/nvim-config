@@ -1,0 +1,141 @@
+================================================================
+05_BUFFERS_WINDOWS — FILES, VIEWS, LAYOUTS, AND SESSIONS
+================================================================
+<leader> is Space. [NATIVE] = Vim/Neovim. [PLUGIN] = plugin/LazyVim.
+Look up :KeyHelp <C-w>v or open <leader>h2 [CUSTOM].
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Buffer: text loaded in Neovim, usually from a file. It can stay open even
+when no window shows it. Special buffers include terminals and help.
+Window: a view of one buffer. Two windows can show the same buffer at
+different positions. A split creates another window.
+Tab page: a set of windows, or a layout. It is not a file tab.
+Session: saved information about buffers and window layouts.
+
+For example: user.go and user_test.go side by side are two buffers,
+two windows, and one tab page. This setup hides the bufferline. Pick
+buffers with <leader>,. The tabline appears when there are several tabs.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use a split for code beside a test, or an interface beside its implementation.
+Use the alternate buffer for two files you switch between often.
+Use tab pages for different layouts. Use a session to resume work later.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Buffers [NATIVE]:
+  :ls or :buffers lists buffers. % marks current, # alternate, + modified.
+  :b 3 selects number 3; :b handler<Tab> completes a name.
+  :bnext / :bprevious selects next / previous buffer.
+  Ctrl-^ switches to the alternate buffer. Ctrl-6 often sends this key.
+  :bd deletes a buffer from the list. It can also close its windows.
+  :enew creates an unnamed buffer. :w path gives it a file name.
+  hidden is enabled, so a modified buffer can stay open without a window.
+  Auto-save and autowrite may write it as you switch.
+
+Buffer helpers [PLUGIN]:
+  <leader>, or <leader>fb picks an opened buffer.
+  <leader>fB includes unlisted buffers.
+  [b / ]b moves to previous / next buffer.
+  <leader>bb switches to the alternate buffer.
+  <leader>bd closes a buffer and keeps the window layout.
+  <leader>bD closes the buffer and window.
+  <leader>bo closes other buffers; <leader>bi closes hidden buffers.
+  <leader>fn opens a new unnamed buffer.
+
+Windows [NATIVE]:
+  Ctrl-w s or :split file creates a horizontal split.
+  Ctrl-w v or :vsplit file creates a vertical split.
+  splitbelow and splitright put new windows below and to the right.
+  Ctrl-w h / j / k / l moves left / down / up / right.
+  Ctrl-w w cycles windows; Ctrl-w p returns to the previous one.
+  Ctrl-w q or :q closes a window. The buffer may stay open.
+  Ctrl-w c closes a window but cannot quit the last one.
+  Ctrl-w o or :only keeps this window only.
+  Ctrl-w = makes sizes equal; Ctrl-w _ maximizes height.
+  Ctrl-w | maximizes width. Ctrl-w + / - changes height.
+  Ctrl-w > / < changes width. A count controls the amount.
+  Ctrl-w x exchanges windows; Ctrl-w r rotates them.
+  Ctrl-w H / J / K / L moves the window to an outer edge.
+  Ctrl-w T moves a window to a new tab page.
+
+Window helpers [PLUGIN]:
+  <leader>- splits horizontally; <leader>| splits vertically.
+  <leader>wd closes a window. <leader>wm toggles window zoom.
+  <leader>uZ also zooms; <leader>uz toggles Zen mode (fewer distractions).
+  Ctrl-w Space enters which-key's repeated window-command mode.
+  Then press h, j, k, l, s, or v without repeating Ctrl-w. Esc exits.
+  <leader>w displays window commands through which-key.
+  Plain Ctrl-h/j/k/l are not mapped to window movement in this setup.
+
+4. IMPORTANT TAB AND SESSION KEYS
+----------------------------------------------------------------
+Tab pages [NATIVE]:
+  :tabnew [file] opens a tab; :tabclose closes it; :tabonly keeps this one.
+  gt / gT goes to next / previous tab. 2gt goes to tab two.
+Tab helpers [PLUGIN]:
+  <leader><Tab><Tab> new; <leader><Tab>] next; <leader><Tab>[ previous.
+  <leader><Tab>d closes; <leader><Tab>o keeps only this tab.
+Sessions [PLUGIN: persistence.nvim]:
+  <leader>qs restores the session for the current directory.
+  <leader>ql restores the last session; <leader>qS picks a session.
+  <leader>qd stops saving the session for this run.
+  Start nvim without a file argument in the project directory, then restore.
+  A session restores a layout. It does not replace Git or file backups.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go: open internal/handler/user.go, press Ctrl-w v, then use Space twice
+to open internal/service/user.go on the right. Move with Ctrl-w h/l.
+Java: open a service beside its test. In the test, <leader>cgS goes to
+the subject class when jdtls is ready [PLUGIN].
+Logs: <leader>rr opens the runner below [CUSTOM]. Ctrl-w j moves to it;
+leave Terminal Mode with Ctrl-\ Ctrl-n before moving back with Ctrl-w k.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+:q closes a window; it does not always remove the file from :ls.
+:bd may close more windows than expected; <leader>bd keeps the layout.
+A tab page is a layout. Use buffers for ordinary file switching.
+Ctrl-w followed by a long pause may open which-key. Choose a key or Esc.
+An app can keep running in a hidden terminal. Close or stop it deliberately.
+
+7. RECOVERY
+----------------------------------------------------------------
+Wrong buffer closed: reopen it with <leader>fr or :e path.
+Wrong split closed: Ctrl-w v, then use :b name to restore its view.
+Crowded layout: Ctrl-w = balances it; Ctrl-w o keeps one window.
+Unexpected exit: start in the same directory and try <leader>qs.
+A session may be missing or older than expected; use recent files if needed.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Ctrl-w means Window. s = split. v = vertical. o = only. q = quit.
+Buffer is the text. Window is the view. Tab is the layout.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Open two demo files with :e and list them with :ls.
+2. Switch with Ctrl-^, then with <leader>,.
+3. Make a vertical split, then a horizontal split.
+4. Balance sizes with Ctrl-w =; try zoom and return.
+5. Close only one window. Confirm its buffer is still in :ls.
+6. Create a tab with :tabnew; return with gT; close it with :tabclose.
+7. Try session restore in a disposable directory after saving your work.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+:windo, :bufdo, and :tabdo run commands across views, buffers, or tabs.
+Their scopes differ. Use them carefully when they change or save text.
+Jump history belongs to a window. Different splits can have different
+Ctrl-o histories. See 13_ADVANCED_VIM.txt.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help windows.txt   :help buffer-list   :help CTRL-W
+  :help tabpage       :help 'hidden'      :help usr_21.txt
+06_FILE_NAVIGATION.txt covers finding files.
+12_TERMINAL_CLIPBOARD.txt covers terminal windows.
+Verification details: VERIFICATION.txt; session/zoom UI is NOT TESTED.

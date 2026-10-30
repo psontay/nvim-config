@@ -1,0 +1,166 @@
+================================================================
+03_EDITING — OPERATORS, MOTIONS, AND TEXT OBJECTS
+================================================================
+<leader> is Space. Start in Normal Mode. :KeyHelp ciw explains a command.
+[NATIVE] = Vim/Neovim. [NEOVIM] = Neovim-specific. [PLUGIN] = plugin/LazyVim.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Operator: an action, such as delete, change, or yank (copy).
+Motion: where the action ends.
+Text Object: a text unit, such as a word, quoted string, or function.
+The pattern is: [count] Operator [count] Motion or Text Object.
+For example, ciw means change inside a word. It deletes the word and
+enters Insert Mode. This pattern makes edits easy to repeat with dot.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use Text Objects when the unit has clear boundaries: ci", ci(, or ciw.
+Use a Motion when the endpoint matters: d$, dt,, or d/foo<CR>.
+Use Visual Mode to inspect a selection before applying an action.
+Use LSP rename for a code symbol across files; see 07_LSP_COMPLETION.txt.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Basic editing [NATIVE]:
+  d{motion} delete/cut      c{motion} delete, then enter Insert Mode
+  y{motion} yank/copy      dd / cc / yy act on a whole line
+  D / C act through the line end. Y yanks to line end in Neovim.
+  x deletes under the cursor; X deletes before it.
+  s changes a character; S changes a line; r{char} replaces a character.
+  R enters Replace Mode. Esc returns to Normal Mode.
+  p puts after the cursor; P before. Linewise text goes below or above.
+  In Visual Mode, p and P replace the selection; they do not just insert.
+  J joins lines with spacing; gJ joins without adding space.
+  gu / gU / g~ make text lowercase / uppercase / toggle case.
+  >> / << shift a line right / left. == reindents it.
+  Ctrl-a / Ctrl-x increase / decrease a number.
+
+Operator plus Motion [NATIVE]:
+  dw deletes toward the next word start; de deletes through the word end.
+  d$ deletes through line end. d0 deletes back to the first column.
+  dt) keeps the ); df) deletes it too.
+  dG deletes to file end; dgg deletes toward file start.
+  d2w equals 2dw. d3j deletes this line and the next three lines.
+  >j indents this line and the next. Counts depend on the chosen Motion.
+
+Text Objects [NATIVE types; mini.ai enhances a/i selection in this setup]:
+  iw / aw word without / with adjacent whitespace
+  iW / aW WORD without / with adjacent whitespace
+  ip / ap paragraph without / with adjacent blank lines
+  is / as sentence
+  i( / a( inside parentheses / parentheses and contents
+  i{ / a{ inside braces / braces and contents
+  i[ / a[ square brackets; i< / a< angle brackets
+  i" / a" double quotes; i' / a' single quotes; i` / a` backticks
+  it / at XML or HTML tag contents / complete tag
+  i means inner. a means around. The cursor often only needs to be inside.
+  Whitespace selection for aw depends on nearby text. It is not always
+  a trailing space. mini.ai may also find a nearby object across lines.
+
+Extra Text Objects [PLUGIN: mini.ai, with Treesitter where needed]:
+  if / af function body / whole function
+  ic / ac class body / whole class
+  io / ao conditional or loop body / whole block
+  ia / aa argument / argument with its separator
+  iq / aq any quote type; ib / ab any bracket type
+  iu / au function call contents / whole call
+  ie name part in camelCase or snake_case; id digits; ig whole buffer
+  cin( chooses the next inner parentheses; cil( chooses previous ones.
+  Parser-based objects require the language parser and its queries.
+
+Other objects [PLUGIN]:
+  ii / ai indentation scope (Snacks scope)
+  ih Git hunk (gitsigns). dih deletes current buffer text in the hunk;
+  it does not restore the original Git version. Use <leader>ghr to reset
+  a hunk after reviewing it. See 11_GIT.txt.
+
+4. IMPORTANT VISUAL, COMMENT, AND SURROUND KEYS
+----------------------------------------------------------------
+  v / V / Ctrl-v  select characters / lines / columns [NATIVE]
+  o               switch selection ends in Visual Mode [NATIVE]
+  gv              reselect the last selection [NATIVE]
+  > / <           shift selection and leave Visual Mode [NATIVE]
+  gc{motion}      toggle comments [NEOVIM]
+  gcc             toggle one line's comment [NEOVIM]
+  gco / gcO       add a comment below / above [PLUGIN: LazyVim]
+  gsaiw"          surround a word with quotes [PLUGIN: mini.surround]
+  gsd"            remove surrounding quotes [PLUGIN]
+  gsr"'           replace double quotes with single quotes [PLUGIN]
+  <leader>up      toggle automatic pairs [PLUGIN: mini.pairs]
+  Alt-j / Alt-k   move lines down / up [PLUGIN; terminal delivery untested]
+
+Visual block: Ctrl-v, extend over lines, I, type a prefix, then Esc.
+The prefix is applied to the selected lines. A appends to the block edge.
+virtualedit=block allows selection past short lines. Test on scratch text.
+No multiple-cursor plugin is installed. Blocks, Macros, and cgn cover many
+repeated edits without adding another editing model.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+On user := repo.FindByID(id, "fast"):
+  ciw on repo changes only that word; type storage and press Esc.
+  ci" changes fast without deleting its quotes.
+  ci( changes all arguments. cia changes one argument [PLUGIN].
+  daa removes an argument with a separator [PLUGIN].
+On a Spring annotation, ci" changes the path inside the quotes.
+Inside <version>3.5.3</version>, cit changes only the version text.
+Inside a Go function, vif selects its body; yaf copies the whole function.
+
+Repeat [NATIVE]:
+  ciwnewName<Esc>, move to another word, then . repeats the whole change.
+  Dot repeats changes, not every command. A yank alone is not a text change.
+  Use * then cgnnewName<Esc> and . to change search matches one at a time.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+d also writes to a Register and can replace the clipboard. Use "_dd to
+discard a line without replacing saved text. Use "0p for the last yank.
+ciw changes the whole word. cw starts at the cursor and has a special
+word-end rule. They are not interchangeable.
+dap can remove blank lines; dip keeps the surrounding blank lines.
+Native ib means parentheses; mini.ai broadens bracket selection here.
+A Visual range followed by :s acts on complete selected lines. Use a
+pattern with \%V when replacements must stay within selected columns.
+
+7. RECOVERY
+----------------------------------------------------------------
+u undoes the last change even after a save. Ctrl-r redoes it.
+Use "1p through "9p to retrieve recent line deletions when available.
+Use <leader>s" to inspect Registers. For older states, use <leader>su.
+After a multi-file rename, each changed buffer has its own undo history.
+Review Git diff before deciding which changes to discard.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Think action plus object: change inside word = ciw.
+Repeating a line Operator often selects a whole line: dd, yy, >>, ==.
+i is inner; a is around. Dot repeats the last change.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. Use :enew and type two copies of user := repo.FindByID(id, "fast").
+2. Try dw, undo, then de. Explain the whitespace difference.
+3. Change fast with ci" and undo.
+4. Change repo with ciwstorage<Esc>; use . on the other repo.
+5. In a scratch Go file, try cia and daa; undo after each change.
+6. Surround a word with gsaiw", replace quotes with gsr"', then remove them.
+7. Select three lines with V2j, shift with >, repeat with ., then undo.
+8. Use a Visual block to add // to several scratch lines.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+gwip wraps a paragraph to textwidth. =ip reindents a paragraph.
+Use <leader>cf for the configured formatter. Reindent and format are
+separate operations; Go and Java style is best handled by their formatter.
+[Space and ]Space add blank lines above and below [NEOVIM].
+Shell filters and Macros: 13_ADVANCED_VIM.txt.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help operator       :help text-objects   :help change.txt
+  :help v_b_I          :help gc             :help quote
+  :help mini.ai        :help mini.surround
+04_SEARCH_REPLACE.txt covers substitutions.
+12_TERMINAL_CLIPBOARD.txt explains clipboard Registers.
+Verification details: VERIFICATION.txt.

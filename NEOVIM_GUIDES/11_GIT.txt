@@ -1,0 +1,136 @@
+================================================================
+11_GIT — REVIEW CHANGES, STAGE HUNKS, AND READ HISTORY
+================================================================
+<leader> is Space. [PLUGIN] = gitsigns or Snacks through LazyVim.
+[CUSTOM] = project runner. Native editing and Git CLI are labeled separately.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Git records project history. A hunk is a group of changed lines.
+gitsigns shows and stages hunks in a tracked file. Snacks pickers show
+status, diffs, and history. Use the Git CLI for commits, branches, and merges.
+Reviewing a small hunk helps you commit only the work you intend to keep.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Before committing, inspect every changed file. Use blame to learn why a
+line changed. Use a hunk preview before staging or resetting one part.
+Auto-save writes edits early; Git diff still shows what changed.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Hunk actions [PLUGIN; normally after gitsigns attaches to a tracked file]:
+  ]h / [h next / previous hunk; ]H / [H last / first.
+  <leader>ghp previews the hunk inline.
+  <leader>ghs stages it; a Visual selection can stage a line range.
+  <leader>ghu undoes a hunk stage operation.
+  <leader>ghr resets the hunk to its base, discarding current changes there.
+  <leader>ghS stages the buffer; <leader>ghR resets the buffer.
+  <leader>uG toggles Git signs.
+  Signs use simple symbols: a vertical bar for additions/changes and a
+  low bar for deleted lines. Colors depend on the terminal/theme.
+
+Text Object [PLUGIN]:
+  vih selects the current hunk; yih yanks its current text.
+  dih deletes that buffer text. It does NOT reset the hunk to its Git base.
+  Reset and delete are different actions. Preview before using <leader>ghr.
+
+Status and diff [PLUGIN]:
+  <leader>gs opens Git status. Tab stages or unstages the selected entry.
+  A restore action in the picker can discard file changes; inspect help first.
+  <leader>gd lists changed hunks across the repository.
+  <leader>ghd opens a diff against gitsigns' current base, normally the index.
+  <leader>ghD compares against the previous commit (~).
+  Close a diff split with :q; :diffoff ends diff mode in the current window.
+  :diffoff! ends it in all windows [NATIVE].
+  Native ]c/[c are diff jumps, but Treesitter class mappings may override them
+  in code buffers. :normal! ]c invokes the native command explicitly.
+
+4. IMPORTANT HISTORY AND TERMINAL COMMANDS
+----------------------------------------------------------------
+  <leader>ghb blame this line; <leader>ghB blame the buffer [PLUGIN].
+  <leader>gf file history; <leader>gl repository history [PLUGIN].
+  <leader>gL history at cwd; <leader>gb line history; <leader>gS stashes [PLUGIN].
+  <leader>gB opens a repository web link; <leader>gY copies it [PLUGIN].
+  GitHub issue/PR pickers require gh, authentication, and repository context.
+  They were not tested here. Lazygit was unavailable in the checkpoint;
+  <leader>gg can be absent. Fugitive and Diffview are not configured.
+
+Use <leader>rc [CUSTOM] or the floating terminal for Git CLI commands:
+  git status -sb
+  git diff
+  git diff --cached
+  git add -p
+  git commit -m "feat: add health endpoint"
+These are commands to choose deliberately, not actions performed by reading
+this guide. A long commit can use git -c core.editor=nvim commit.
+Inside that editor, :wq saves the message; :cq exits with an error to abort.
+
+5. PRACTICAL EXAMPLE
+----------------------------------------------------------------
+In a disposable Git repository, edit two separated lines of a tracked file.
+Use ]h to visit a hunk, <leader>ghp to review it, and <leader>ghs to stage it.
+Use <leader>gs and git diff --cached to confirm the staged content.
+Inspect <leader>gf for the file's history. Keep unrelated edits unstaged.
+Use the same process for a Go handler or a Spring controller.
+
+Merge conflicts:
+  Search for /<<<<<<< and inspect both sides of each marked block.
+  Keep the intended content and remove the conflict markers.
+  Run tests, stage the resolved files, then continue the merge or rebase.
+  Use IntelliJ/GoLand's merge view when it makes the result easier to assess.
+  git merge --abort or git rebase --abort cancels the corresponding operation;
+  inspect Git status first to know which operation is active.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+No Git signs can mean the file is untracked or outside a repository.
+No hunk mappings can mean gitsigns has not attached yet.
+<leader>gs is status; <leader>ghs stages a hunk.
+A reset action removes work; it does not merely unstage it.
+Git cannot recover an untracked file that was never added or committed.
+The index is staged content, not always the same as HEAD (the last commit).
+
+7. RECOVERY
+----------------------------------------------------------------
+After an accidental hunk reset in Neovim, try u immediately and inspect diff.
+To unstage a file while keeping working text, use git restore --staged path.
+Before discarding file edits, inspect git diff -- path. git restore -- path
+replaces working text from the index and loses uncommitted changes there.
+To undo an already shared commit, git revert creates a reversing commit.
+git reflog can help locate earlier branch positions; inspect before changing
+history. Avoid broad reset/clean commands as routine recovery.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+g = Git. gh = Git hunk. p = preview. s = stage. r = reset. b = blame.
+Uppercase S/R apply to a buffer rather than one hunk.
+Preview, stage, inspect staged diff, then commit.
+
+9. PRACTICE
+----------------------------------------------------------------
+Use a disposable Git repository with an initial commit.
+1. Add, change, and delete separate lines. Inspect the signs.
+2. Visit and preview each hunk.
+3. Stage one hunk, inspect staged diff, then undo the stage.
+4. Reset a practice hunk, undo it, and confirm the result.
+5. Read blame and history without changing the repository.
+6. Run git status -sb and explain staged versus unstaged changes.
+Do not practice history deletion in a real project.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+git add -p selects parts of a file from the CLI. Stashes can temporarily
+store work; inspect them before applying, since application can conflict.
+Native diff windows support do and dp to obtain/put changes. Use them only
+when the source and destination windows are clear.
+No dedicated conflict-resolution or coverage plugin is configured.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help gitsigns       :help gitsigns.diffthis
+  :help diff           :help :diffoff
+  https://git-scm.com/docs
+04_SEARCH_REPLACE.txt covers quickfix; 12_TERMINAL_CLIPBOARD.txt covers Git CLI access.
+Verification details: VERIFICATION.txt. Stage/reset/blame interaction in
+Konsole and remote GitHub operations are NOT TESTED in this migration.

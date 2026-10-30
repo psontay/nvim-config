@@ -1,0 +1,119 @@
+VERIFICATION — ENGLISH DOCUMENTATION MIGRATION
+========================================================================
+Date: 2026-10-29
+Configuration: Neovim v0.12.5, LazyVim 16.0.1
+Lockfile SHA-256: 2861444b7e9c4dd5af2fa18b4416783c6086e24612c78d01b9389d64bc8a8a31
+
+PASS / FAIL / NOT TESTED / BLOCKED refer to this migration's checks.
+Historical October 22/23 results were inspected as context, not counted as
+newly executed tests. All 16 guides passed the final documented checks.
+
+HANDOFF AND CHECKPOINT
+------------------------------------------------------------------------
+PASS  Existing architecture understood; no install, plugin replacement,
+      architecture rewrite, system JDK/Go change, or new keymap.
+PASS  All 16 guides already existed in Vietnamese. They were translated,
+      not recreated as a new setup. Original manifest was preserved in backup.
+PASS  Reused the 588-row keymaps_dump.tsv, 105-row commands_dump.tsv,
+      harness.lua, lsputil.lua, facts/advanced-command results, and guide results
+      from ~/.cache/nvim-guides-work/. No full dump regeneration was needed.
+      The old dump predates the guide shortcut; current sources take priority.
+PASS  Full pre-change documentation/config archive and SHA-256 saved under
+      .documentation-backups/20261029-191815/.
+      Original ~/nvim-backups/20261022-211315/ remains untouched.
+
+ENGLISH HELP AND CONTENT
+------------------------------------------------------------------------
+PASS  333 KeyHelp descriptions translated; all examples reviewed, 206 rewritten. Category structure,
+      keys, modes, levels, sources, help tags, and related keys preserved.
+      Levels: 58 / 132 / 118 / 25 entries. Sources: 213 native, 101 plugin,
+      19 custom. Visible category names, learning tips, menus, notifications,
+      runner prompts, keymap descriptions, and Go launch label are English.
+PASS  README.md, docs/WORKFLOWS.md, generated docs/KEYMAPS.md translated.
+PASS  Both generators now produce English. Text reference generated from
+      real Go/Java buffers: 333 entries, 196 additional mappings, 0 missing.
+PASS  scripts/check-english-help.lua opened real headless Snacks detail windows
+      for :KeyHelp e, :KeyHelp ciw, :KeyHelp d and all four learning levels.
+PASS  Actual filtered picker results, not total database counts:
+      ciw 135; delete 247; window 115; register 160; rename 171; debug 58;
+      Movement category 35. Fuzzy matches can include non-literal matches.
+PASS  Documentation menu exposes three Markdown documents, opens protected
+      reading windows, and guide picker finds the index and opens a guide.
+      Native gf navigation from the index opens the referenced survival guide.
+
+GUIDE AND SOURCE VERIFICATION
+------------------------------------------------------------------------
+PASS  16/16 guides, three Markdown documents, manifest, and verification report:
+      strict UTF-8, nonempty content, English scope, 11 learning sections,
+      internal text references and Markdown links, generated-description coverage.
+      scripts/check-learning-content.py: 0 errors.
+PASS  scripts/check-guides.lua: 16 files, 464 leader-key references checked,
+      0 errors, 0 version/lock warnings. Matching preserves case and punctuation;
+      arbitrary nonexistent prefixes no longer count as valid mappings.
+PASS  190 referenced help topics resolve when the owning plugins are loaded.
+      Plugin help can be unavailable before its feature loads; this existing
+      lazy-loading condition is explained in the guides.
+PASS  Lua syntax and StyLua checks on modified Lua files/scripts.
+PASS  All 333 structural records preserve key/mode/level/source/help/relations.
+      375 global mapping definitions before/after are identical after excluding
+      descriptions. lazy-lock.json and unrelated config/helpers are unchanged.
+PASS  An invalid learning level now gives an English notice instead of an error.
+      No key sequence or valid learning-level behavior changed.
+
+EDITOR AND DEVELOPMENT REGRESSION
+------------------------------------------------------------------------
+PASS  Headless startup with installed plugins and isolated writable tool data.
+PASS  scripts/check-keyhelp.lua with initialized Go/Java and tracked Git files:
+      333 entries, 115 custom/plugin mappings checked, 0 errors.
+PASS  scripts/check-native-keys.lua after completion/mini plugins load:
+      native mapping exclusions, e/ge, d2w, ciw, dot repeat, Ctrl-k ae digraph,
+      n after backward search, Macro record/playback, Registers/black hole,
+      and Ctrl-w vertical split.
+PASS  Live gopls and jdtls initialized on disposable copies of existing demos.
+      Both returned definitions, hover, and nonempty completion responses.
+PASS  Go: conform actually ran goimports and corrected malformed spacing.
+      Java: jdtls answered a formatting request; save autoformat remains off.
+PASS  Completion preset remains enter; blink's Ctrl-k override remains disabled.
+PASS  Go/Java test/debug integration configuration loaded: neotest API,
+      custom Go main-package program/cwd, Java-local test mapping and Java
+      DAP adapter. These are integration checks, not test/debug executions.
+
+LIMITS AND TEST ENVIRONMENT
+------------------------------------------------------------------------
+NOT TESTED  Real Konsole rendering, colors, which-key timing, function/Alt
+            key delivery, mouse selection, bracketed paste, desktop clipboard,
+            PRIMARY selection, or physical terminal shortcut presses.
+NOT TESTED  Fresh Go/JUnit test execution, HTTP breakpoint/step sessions,
+            remote attach, Go test debugging, hot code replace, Gradle runtime,
+            Java extraction UI, session restore, destructive Git/explorer actions,
+            GitHub authentication/actions, plugin updates, or backup restore.
+            Language/debug behavior was not changed; expensive end-to-end tests
+            were not repeated for this language/documentation migration.
+BLOCKED     Normal background registry refresh/update in the network-restricted
+            sandbox. Initial startup reported Mason EPERM/network errors.
+            A temporary test wrapper used the copied installed registry offline,
+            disabled install/update checks, and stored data/cache/state in /tmp.
+            Live configuration was not changed to suppress this behavior.
+
+Test paths:
+  /tmp/nvim-english-work/test-init.lua      sandbox-only startup wrapper
+  /tmp/nvim-english-work/fixtures/          copied demo projects, local Git repos
+  /tmp/nvim-english-work/smoke.lua          live LSP/format/integration probes
+All project writes and new tool state stayed in the configuration workspace
+or /tmp. The original demo projects and installed plugin sources were read only.
+
+Earlier check failures explained:
+  - Git keys were absent in copies that initially omitted .git. Creating a
+    disposable local repository restored the expected gitsigns context.
+  - The picker test originally read total item count; it now checks filtered
+    results and English matching text. No search implementation change was needed.
+
+REPRODUCE
+------------------------------------------------------------------------
+From ~/.config/nvim, see README.md and 14_TROUBLESHOOTING.txt for commands.
+Run scripts/check-english-help.lua and scripts/check-native-keys.lua headless.
+Use real Go/Java build files and a tracked Git file with KEYHELP_FILES for
+scripts/check-keyhelp.lua and scripts/check-guides.lua.
+Run python3 scripts/check-learning-content.py for English, UTF-8, references,
+section coverage, Lua syntax, and generated-table content consistency.
+Headless results do not imply interactive desktop tests passed.

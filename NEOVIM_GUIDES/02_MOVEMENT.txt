@@ -1,0 +1,150 @@
+================================================================
+02_MOVEMENT — MOVE WITH PURPOSE
+================================================================
+Use Normal Mode. Most native Motions also work after an Operator and
+in Visual Mode. <leader> is Space. KeyHelp: :KeyHelp e or :KeyHelp ge.
+[NATIVE] = Vim/Neovim. [PLUGIN] = plugin/LazyVim. [CUSTOM] = local setup.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Motion: a command that moves the cursor. A Motion can also tell an
+Operator where to stop. For example, w moves to the next word; dw deletes
+toward that point. Learn a few useful Motions and combine them with d, c,
+and y. You need fewer repeated arrow-key presses.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use a word Motion for a nearby name. Use f or t for a character on this
+line. Use / for a word farther away. Use gd for a definition when a
+Language Server is attached. Use Ctrl-o to return after a jump.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Characters and lines [NATIVE]:
+  h left; j down; k up; l right.
+  j and k move by real lines. gj and gk move by wrapped screen lines.
+  Relative line numbers show distance: a line marked 7 is seven lines away.
+  7j or 7k goes there. A count chooses the distance.
+
+Words [NATIVE]:
+  w  next word start         b  current or previous word start
+  e  current or next end     ge previous word end
+  W B E gE use WORDs. A WORD is a sequence without whitespace.
+  A word depends on iskeyword. Letters, numbers, and underscore normally
+  form words; punctuation can form another word.
+  In user.GetName(id), w stops at several parts. W treats the expression
+  as one WORD. Try both in a scratch buffer.
+
+Within a line [NATIVE]:
+  0 first column; ^ first non-blank character; $ line end.
+  f{char} finds a character to the right; F{char} finds one to the left.
+  t{char} stops just before it to the right; T{char} just after it to the left.
+  ; repeats the last character search; , repeats it in the opposite direction.
+  On fmt.Println("hi"), f( lands on (. t( stops on the n before it.
+  2f" finds the second quote to the right, if it exists on this line.
+
+Within a file [NATIVE]:
+  gg first line; G last line; 42G or 42gg or :42 goes to line 42.
+  H top visible text line; M middle; L bottom. scrolloff can keep the
+  cursor away from the screen edge.
+  Ctrl-d / Ctrl-u scroll half a screen down / up.
+  Ctrl-f / Ctrl-b scroll a page down / up.
+  zz centers this line; zt puts it at the top; zb at the bottom.
+  % jumps to a matching bracket. matchit extends matching in supported files.
+  { and } move by paragraphs, often to blank lines. ( and ) move by sentences.
+
+Search as a Motion [NATIVE]:
+  /userID<CR> searches forward; ?userID<CR> searches backward.
+  n follows the last search direction. N reverses it.
+  * searches forward for the whole word; # searches backward.
+  d/foo<CR> deletes up to the next foo. See 04_SEARCH_REPLACE.txt.
+
+Code structure [PLUGIN: Treesitter textobjects]:
+  ]f / [f next / previous function start; ]F / [F function end.
+  ]c / [c class start; ]C / [C class end.
+  ]a / [a argument start; ]A / [A argument end.
+  These require a parser and language queries. They may not exist in plain text.
+
+Other lists [PLUGIN in this setup]:
+  ]d / [d diagnostics; ]e / [e errors; ]w / [w warnings.
+  ]h / [h Git hunks; ]b / [b buffers; ]t / [t TODO comments.
+  ]q / [q quickfix or Trouble entries.
+  ]] / [[ highlighted symbol references when LSP supports them (Snacks words).
+  Go's ftplugin also uses section Motions in Operator-pending/Visual Mode.
+  Check the mode before assuming ]] means the same thing everywhere.
+
+4. IMPORTANT JUMP AND CHANGE KEYS [NATIVE]
+----------------------------------------------------------------
+Jump list: positions visited by jump commands, such as G, search, or gd.
+  Ctrl-o goes back. Ctrl-i goes forward. Tab can share Ctrl-i's terminal code.
+  `` returns to the exact position before the last jump.
+Change list: positions where you changed text.
+  g; goes to an earlier change; g, to a later change; gi inserts at the
+  last insertion position.
+Marks: named positions.
+  ma sets Mark a in this file; `a returns to its exact position.
+  'a returns to its line. Uppercase Marks can cross files.
+  :marks lists them; <leader>sm opens a picker [PLUGIN].
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go/Gin:
+  Open internal/handler/user.go. Search /GetUser<CR>.
+  Use f( to find an opening parenthesis and % to find its partner.
+  Use gd on a service call, read it, then Ctrl-o to return.
+Java/Spring:
+  Open a controller. Use ]f to visit methods if the parser is ready.
+  Set ma before reading another part. Return with `a.
+  Use 25G to reach a known diagnostic line.
+Counts combine with Operators: d3w equals 3dw. 2d3w covers six words.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+e moves forward to an end; ge moves backward to an end.
+f lands on a character; t stops before it. df, includes the comma; dt,
+keeps it. Character searches stay on one line. Use / to cross lines.
+H and L refer to the screen, not the file or a buffer.
+n goes backward after a ? search. This setup preserves that native rule.
+Normal Mode Ctrl-f scrolls a page; Insert Mode Ctrl-f may scroll completion
+help. Keys depend on the mode and on the active popup.
+
+7. RECOVERY
+----------------------------------------------------------------
+Use Ctrl-o after a wrong jump. Small h/j/k/l/w steps do not each create
+jump entries. Use a Mark if you need to return to a precise location.
+Scrolling alone does not reliably set the previous-jump position.
+Press Esc to cancel an incomplete command, such as d, g, or z.
+Movement does not change text. If you ran an editing command, use u.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+w = word. b = back. e = end. f = find. t = till.
+H/M/L = High/Middle/Low on the screen.
+Use the relative line number before pressing j or k repeatedly.
+which-key shows available prefix commands when you pause [PLUGIN].
+
+9. PRACTICE
+----------------------------------------------------------------
+1. In :enew, type: user.GetName(id, "fast") and two more lines.
+2. Compare w with W, and e with ge.
+3. From column one, compare f( with t(.
+4. Use f" then ; then , to move between quotes.
+5. Set ma, jump with G, and return with `a.
+6. Search backward with ?user<CR>; explain n and N.
+7. In a Go file, use gd and Ctrl-o without editing the file.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+Combine a Motion with an Operator: d$, ct), yG, or >j.
+Text Objects select a unit regardless of the exact cursor position:
+ciw changes a word; ci( changes parentheses contents. See 03_EDITING.txt.
+Use <leader>sj to inspect the jump list [PLUGIN].
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help motion.txt      :help word-motions     :help f
+  :help t               :help jumplist        :help changelist
+  :help mark-motions
+07_LSP_COMPLETION.txt covers symbol navigation.
+13_ADVANCED_VIM.txt covers Marks and repeatable tasks.
+Verification details: VERIFICATION.txt. Konsole key delivery is NOT TESTED.

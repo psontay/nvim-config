@@ -1,0 +1,157 @@
+================================================================
+08_GO_GIN — A DAILY GO AND GIN WORKFLOW
+================================================================
+<leader> is Space. [CUSTOM] = local runner; [PLUGIN] = LazyVim/plugin;
+[NATIVE] = Vim/Neovim. Shared LSP keys are in 07_LSP_COMPLETION.txt.
+Tools: gopls, goimports, Delve, neotest-golang, and optional project linting.
+The existing demo is ~/Workspace/Vim/go-gin-demo; its HTTP port is 8088.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+This configuration supports writing, reading, testing, and debugging Go
+without leaving Neovim. gopls understands code; goimports formats and
+manages imports; neotest shows test results; Delve runs debug sessions.
+Gin uses the same Go tools. There is no separate Gin language plugin.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Use this workflow for handlers, services, repositories, and small refactors.
+Use GoLand when a larger refactor, profiler, or specialized view helps.
+Start in a module directory so terminal commands and file search have
+predictable scope.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Open the module:
+  cd ~/Workspace/Vim/go-gin-demo && nvim internal/handler/user.go
+  gopls finds go.mod or go.work. Use <leader>cl to inspect the client.
+  Go uses tabs; this setup displays them as four columns.
+
+Create code:
+  :e internal/handler/product.go opens a path [NATIVE].
+  The configured save workflow can create parent directories when needed.
+  <leader>e then a creates a file through the explorer [PLUGIN].
+  Completion can suggest unimported packages and function arguments.
+  Choose a snippet from completion; Tab moves between active fields.
+  Snippet prefixes depend on the installed collection; inspect the menu
+  rather than assuming a particular abbreviation.
+
+Format and imports [PLUGIN + CUSTOM policy]:
+  :w or Normal Mode Ctrl-s runs goimports if autoformat is enabled.
+  goimports applies gofmt formatting and adds/removes/sorts imports.
+  Auto-save skips formatting so partially typed imports can remain.
+  <leader>cf formats manually; <leader>co organizes imports through LSP.
+  gofumpt is disabled. <leader>uF toggles buffer format-on-save.
+  Saving manually can remove an import that is not yet used.
+
+Read the request flow [PLUGIN/NEOVIM LSP]:
+  main.go registers r.GET("/users/:id", h.GetUser).
+  gd on GetUser opens the handler. Follow h.svc.GetUser into the service.
+  Follow s.repo.FindByID into the repository interface; gI finds its implementation.
+  Ctrl-o returns. K shows documentation. <leader>cu shows references.
+  <leader>ci shows callers; <leader>cI shows called functions [CUSTOM].
+  gd on gin.Default opens dependency source; avoid editing the module cache.
+
+Refactor:
+  grn or <leader>cr renames symbols. <leader>ca offers code actions.
+  Go extraction actions depend on the server and selected code.
+  The none-ls integration for gomodifytags and impl is not enabled.
+  Do not assume those tool commands are available just because a binary exists.
+
+Diagnostics:
+  gopls supplies compile checks, vet, and configured staticcheck analyses.
+  ST1000 (package comment warnings) is disabled in this configuration.
+  golangci-lint runs only when a supported .golangci configuration file
+  is found above the file and the executable is available.
+  Supported names: .golangci.yml, .golangci.yaml, .golangci.toml, .golangci.json.
+  Use ]e, <leader>cd, and <leader>sd to inspect problems.
+
+4. IMPORTANT RUN, TEST, AND DEBUG KEYS
+----------------------------------------------------------------
+Runner [CUSTOM]:
+  <leader>rr  go run . at the root if main.go exists there
+              otherwise the first cmd/*/main.go package is chosen
+  <leader>rb  go build ./...
+  <leader>rt  go test ./...
+  <leader>rc  custom command at the detected root
+  <leader>rl  repeat the last runner command
+  If no supported main.go layout is found, run falls back to go run .
+  in the opened file's directory. Use a custom command for other layouts.
+  A go.work root may contain several modules and no runnable package.
+  In that case choose a module explicitly with a custom command.
+
+Tests [PLUGIN: neotest-golang]:
+  <leader>tt file; <leader>tr nearest test; <leader>tT all test files.
+  <leader>tl last run; <leader>ts summary; <leader>to output.
+  <leader>tO output panel; <leader>tS stop; <leader>tw watch.
+  <leader>td debugs the nearest Go test through Delve.
+
+Debug [PLUGIN + CUSTOM function keys]:
+  <leader>db breakpoint; <leader>dc starts or continues.
+  Choose Debug app (module main package) to launch the module's API.
+  F9 continues; F8 steps over; F7 steps into; Shift-F8 steps out.
+  <leader>dr console; <leader>de evaluates; <leader>dt terminates.
+  See 10_TEST_DEBUG.txt for leader-key alternatives and limitations.
+
+5. PRACTICAL EXAMPLE: DEBUG A REQUEST
+----------------------------------------------------------------
+1. Open internal/handler/user.go in a demo copy.
+2. Place a breakpoint on an executable line in GetUser with <leader>db.
+3. Start <leader>dc and choose Debug app (module main package).
+4. In another terminal: curl http://localhost:8088/users/1
+5. At the pause, inspect id and the call stack. Continue the request.
+6. Terminate with <leader>dt when finished.
+For ordinary running, <leader>rr opens a terminal below and keeps focus
+in code. Move there with Ctrl-w j. Use i to send terminal input, Ctrl-c
+to stop the app, then Ctrl-\ Ctrl-n and q to hide the terminal.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+A non-main package cannot be run directly. Check the chosen command/root.
+The runner chooses the first supported cmd package, not an app selection menu.
+Test files must end in _test.go and use valid Go test names/signatures.
+Go may cache passing tests. Use go test -count=1 ./... when you need a fresh run.
+A busy port often means an earlier terminal or debugger is still running.
+Check that session before starting another app. Do not kill unrelated processes.
+
+7. RECOVERY
+----------------------------------------------------------------
+u reverses an edit; inspect Git diff after multi-file refactors.
+:lsp restart restarts LSP clients when gopls is stuck.
+Check go env and dependency errors before clearing caches. Deleting the
+whole Go module cache is not a normal first troubleshooting step.
+Terminate a debug session with <leader>dt or stop the runner with Ctrl-c.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+c = code, r = runner, t = tests, d = debug.
+Go manual save means format plus import cleanup. Auto-save only writes.
+Follow code with gd and return with Ctrl-o.
+
+9. PRACTICE
+----------------------------------------------------------------
+Use a disposable copy of the demo so auto-save cannot affect real work.
+1. Trace the route through handler, service, and repository.
+2. Add a /health route returning gin.H{"status": "ok"}.
+3. Run it and call curl http://localhost:8088/health.
+4. Open internal/service/user_test.go and run the nearest test.
+5. Inspect test output and run the full project test command.
+6. Debug GetUser and inspect its id variable.
+7. Review all changes with git diff before deciding what to keep.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+Use <leader>rc for go test -race ./..., go test -cover ./..., go vet ./...,
+or go mod tidy. These are Go CLI commands, not additional keymaps.
+Delve Attach and test debugging are configured but need runtime checks
+for your project. DEBUGINFOD_URLS is cleared only for Neovim children to
+avoid slow debug-info downloads; the system environment is unchanged.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help lsp        :help dap       :help neotest
+  https://go.dev/gopls/    https://go.dev/doc/
+  https://gin-gonic.com/en/docs/
+09_JAVA_SPRING.txt compares Java workflows; 10_TEST_DEBUG.txt has shared controls.
+Verification details: VERIFICATION.txt. HTTP/debug end-to-end checks are
+NOT TESTED in this documentation migration; historical claims are not current tests.

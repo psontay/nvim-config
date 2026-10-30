@@ -1,0 +1,164 @@
+================================================================
+04_SEARCH_REPLACE — FIND TEXT AND CHANGE IT CAREFULLY
+================================================================
+<leader> is Space. [NATIVE] = Vim/Neovim. [PLUGIN] = plugin/LazyVim.
+Start with :KeyHelp /, :KeyHelp :%s, or <leader>hh.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Search finds text in a buffer or project. Substitute replaces matches.
+Use file search for a local change, project grep for unknown locations,
+and LSP rename for a code symbol. A symbol is a named code item such as
+a variable, function, or class. LSP understands its uses better than grep.
+
+This setup enables ignorecase and smartcase: lowercase patterns usually
+ignore case; a pattern with uppercase letters becomes case-sensitive.
+Search wraps at the file end. Incremental search shows matches while you
+type. inccommand=nosplit previews substitutions in the current buffer.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+  Known text in this file       / or *
+  Text across the project       <leader>/ [PLUGIN]
+  Code symbol's uses            grr or <leader>cu; see 07_LSP_COMPLETION.txt
+  Plain text replacement        :s or <leader>sr [PLUGIN]
+  Code symbol rename            grn or <leader>cr through LSP
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+In-file search [NATIVE]:
+  /pattern<CR> forward; ?pattern<CR> backward.
+  n follows the last search direction. N goes the other way.
+  * searches for the whole word under the cursor; # searches backward.
+  g* and g# also allow partial word matches.
+  /foo/e<CR> stops at the match end.
+  d/foo<CR> uses search as an Operator's endpoint.
+  :nohlsearch clears highlights; Esc in Normal Mode also does this [PLUGIN].
+  q/ opens search history for editing. Close it with :q.
+  In Neovim, Visual * searches the selected text; check :help v_star-default.
+
+Vim patterns [NATIVE]:
+  . any character; * zero or more of the previous item
+  \+ one or more; \? zero or one; \{n,m} repeat n to m times
+  ^ start of line; $ end of line; \< and \> word boundaries
+  \(...\) capture a group; \1 refers to it in replacement text
+  \| means or; [A-Z] matches an uppercase letter
+  \d digit; \s whitespace; \w word character
+  \v uses very magic syntax with fewer escapes for common operators.
+  /\v(Get|Set)\w+\( finds names such as GetName( or SetName(.
+  \c ignores case for this pattern; \C requires matching case.
+  /\Vfoo.bar treats the dot literally. Backslash still has special uses.
+
+Substitute [NATIVE]:
+  :s/old/new/          first match on this line
+  :s/old/new/g         all matches on this line
+  :%s/old/new/g        all lines in this buffer
+  :%s/old/new/gc       ask before each change
+  :10,20s/old/new/g    lines 10 through 20
+  :'<,'>s/old/new/g    Visual-selected lines; : inserts the range for you
+  :%s/\<id\>/userID/g  whole word id only
+  :%s/old//g          delete matching text
+  :%s//new/g          reuse the last search pattern
+  :s#a/b#c/d#g        use # as the separator for paths
+  Confirmation: y yes; n skip; a all; q quit; l replace this one and stop.
+  Before Enter, Esc cancels the preview. After the command, u undoes it.
+  & repeats on this line without old flags. g& repeats across the file
+  with the old flags. See :help & before depending on this distinction.
+
+Project search [PLUGIN: Snacks picker and ripgrep]:
+  <leader>/ or <leader>sg searches the project root.
+  <leader>sG searches the current working directory (cwd).
+  <leader>sw searches the word or Visual selection at the project root.
+  <leader>sW uses cwd. <leader>sb searches buffer lines.
+  <leader>sB searches opened buffers. <leader>sR resumes the last picker.
+  Ripgrep and Vim have different pattern syntax. Do not copy complex
+  patterns between them without checking.
+
+4. IMPORTANT PICKER AND QUICKFIX KEYS
+----------------------------------------------------------------
+Picker [PLUGIN]: Ctrl-j / Ctrl-k selects a result. Enter opens it.
+Ctrl-v opens a vertical split; Ctrl-s opens a horizontal split.
+Tab selects several results; Ctrl-q sends selected results, or all results,
+to quickfix. Alt-h toggles hidden files; Alt-i toggles ignored files.
+Press ? in picker Normal Mode for help; Esc closes or leaves input mode.
+
+Quickfix [NATIVE]: a shared list of file positions, often search results.
+  :grep TODO .        use ripgrep from this directory
+  :copen / :cclose    open / close the list
+  :cnext / :cprevious next / previous entry
+  :colder / :cnewer   earlier / later quickfix list
+  :lopen / :lclose    open / close a window's separate location list
+  <leader>xq toggles quickfix; <leader>xl toggles location list [PLUGIN].
+  ]q / [q walks quickfix or Trouble entries [PLUGIN in this setup].
+  <leader>sq / <leader>sl picks quickfix / location entries [PLUGIN].
+  <leader>xx opens Trouble diagnostics [PLUGIN].
+
+Multi-file replacement [PLUGIN: grug-far]:
+  <leader>sr opens the search-and-replace buffer.
+  Fill Search, Replace, and Files Filter; for example, *.go.
+  Review every affected file before applying.
+  Local leader is backslash here: \r applies replacement; \q sends results
+  to quickfix; \c closes; g? lists the plugin's keys.
+  These keys work in the grug-far buffer, not in an ordinary code buffer.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go: <leader>/, type NotFound, then open a handler result.
+Change an error string only in this file:
+  :%s/invalid id/bad id/gc
+Java: search for @GetMapping across the project. Use Files Filter
+*.properties in grug-far to limit a configuration value replacement.
+Use LSP rename rather than text replacement to rename GreetingService.
+
+Native multi-file example:
+  :grep OldName .
+  :copen
+  :cfdo %s/OldName/NewName/gc | update
+:cfdo runs once per file; :cdo runs at each entry. update writes changes.
+Auto-save may also write buffers as you move. Use a disposable copy for
+practice; inspect Git diff after real multi-file changes.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+Without g, :s changes only the first match on each selected line.
+A dot in a pattern is not a literal dot. Use \. or \V when appropriate.
+A Visual line range includes whole lines, not just selected columns.
+After ?, n goes backward. smartcase can also change the results.
+A picker rooted at the project and one rooted at cwd may show different files.
+
+7. RECOVERY
+----------------------------------------------------------------
+u undoes one substitution in its buffer. A multi-file change needs review
+and possibly undo in each affected buffer. grug-far can write files on disk;
+do not assume one u in its result window reverses every file.
+Inspect git diff. If needed, restore only selected changes after reviewing
+what will be lost. See 11_GIT.txt. Clear leftover highlights with Esc.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+% means all lines in a range. s means substitute. g means every match on
+each line. c means confirm. A quickfix list is a set of places to visit.
+
+9. PRACTICE
+----------------------------------------------------------------
+1. In :enew, add three lines containing id and userId.
+2. Compare /id with /\<id\>.
+3. Try :%s/\<id\>/userID/gc. Use y, n, and q; then undo.
+4. Select two lines and run :s/id/ID/g.
+5. In a demo project, grep NotFound and send results to quickfix.
+6. Open grug-far and preview a replacement. Close with \c before applying.
+
+10. ADVANCED FEATURES
+----------------------------------------------------------------
+cgn plus dot changes matches one at a time. :g selects lines by a pattern.
+Macros and :normal can run repeatable changes on those lines.
+See 13_ADVANCED_VIM.txt. Keep :cdo and :cfdo ranges clear when saving.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help pattern.txt   :help :substitute   :help quickfix
+  :help :cdo         :help :cfdo         :help 'smartcase'
+  :help 'inccommand'
+06_FILE_NAVIGATION.txt covers picker scope. 07_LSP_COMPLETION.txt covers rename.
+Plugin keys: installed grug-far README and Snacks picker help.
+Verification details: VERIFICATION.txt; interactive replacement UI is NOT TESTED.

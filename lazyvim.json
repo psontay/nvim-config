@@ -1,0 +1,17 @@
+{
+  "extras": [
+    "lazyvim.plugins.extras.lang.go",
+    "lazyvim.plugins.extras.lang.java",
+    "lazyvim.plugins.extras.dap.core",
+    "lazyvim.plugins.extras.test.core",
+    "lazyvim.plugins.extras.lang.docker",
+    "lazyvim.plugins.extras.lang.yaml",
+    "lazyvim.plugins.extras.lang.json",
+    "lazyvim.plugins.extras.coding.mini-surround"
+  ],
+  "install_version": 8,
+  "news": {
+    "NEWS.md": "11866"
+  },
+  "version": 8
+}

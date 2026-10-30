@@ -1,0 +1,161 @@
+================================================================
+00_INDEX — YOUR ENGLISH NEOVIM LEARNING GUIDES
+================================================================
+For the existing Go/Gin and Java/Spring Boot configuration.
+Neovim v0.12.5; LazyVim 16.0.1. Exact stamps are in MANIFEST.txt.
+Desktop: Fedora 44, KDE Plasma, Wayland, Konsole.
+This is a guide to the installed setup, not a new installation plan.
+
+1. WHAT THIS SET DOES AND WHY IT HELPS
+----------------------------------------------------------------
+Learn native Vim editing while using professional Go and Java tools.
+Each topic explains what a feature does, when to use it, its commands,
+a practical example, common mistakes, recovery, memory tips, exercises,
+and related features. Use one short practice session at a time.
+The key table is a reference rather than a chapter to memorize.
+
+2. CONTENTS
+----------------------------------------------------------------
+  00_INDEX.txt              this index, notation, help, learning path
+  01_SURVIVAL.txt           modes, open/save/quit, undo, recovery
+  02_MOVEMENT.txt           Motions, counts, jumps, Marks
+  03_EDITING.txt            Operators, Text Objects, Visual Mode, repeat
+  04_SEARCH_REPLACE.txt     patterns, substitutions, grep, quickfix
+  05_BUFFERS_WINDOWS.txt    buffers, splits, tab pages, sessions
+  06_FILE_NAVIGATION.txt    project roots, file/symbol pickers, explorer
+  07_LSP_COMPLETION.txt     code help, diagnostics, refactors, formatting
+  08_GO_GIN.txt             Go tools, request flow, run/test/debug
+  09_JAVA_SPRING.txt        JDK roles, jdtls, Spring, Maven/Gradle
+  10_TEST_DEBUG.txt         Go/Java tests, breakpoints, stepping, values
+  11_GIT.txt                hunks, staging, blame, history, recovery
+  12_TERMINAL_CLIPBOARD.txt terminal modes, shell commands, Registers
+  13_ADVANCED_VIM.txt       Macros, Marks, :g, :normal, cgn, command history
+  14_TROUBLESHOOTING.txt    diagnosis, verification, generation, backups
+  15_KEYMAPS.txt            generated key reference and active-map appendix
+  MANIFEST.txt              per-file progress, dependencies, version stamps
+  VERIFICATION.txt          current PASS/FAIL/NOT TESTED/BLOCKED results
+
+Shorter configuration documents are in ../README.md, ../docs/KEYMAPS.md,
+and ../docs/WORKFLOWS.md. The Markdown key table uses KeyHelp's source data.
+
+3. WHEN TO READ EACH PART
+----------------------------------------------------------------
+New to Vim: read 01 through 07 in order. Then choose 08 for Go or 09 for
+Java, followed by 10 through 12. Read 13 when basic editing feels familiar.
+Already comfortable: check 02 and 03 for this setup's preserved native keys,
+then use the language guide and 15_KEYMAPS.txt as references.
+If a command fails, use 14_TROUBLESHOOTING.txt rather than changing mappings.
+
+4. OPEN AND NAVIGATE THE DOCUMENTATION
+----------------------------------------------------------------
+  <leader>hg or :KeyHelp guides opens the existing guide picker [CUSTOM].
+  Type part of a filename; Enter opens it in a buffer.
+  <leader>hd or :KeyHelp docs offers README, KEYMAPS, and WORKFLOWS [CUSTOM].
+  Those Markdown reading windows are read-only while open; q closes them.
+  Direct access: :e ~/.config/nvim/NEOVIM_GUIDES/01_SURVIVAL.txt
+  In a guide, / searches, n repeats, and Ctrl-o returns after a jump.
+  gf on another guide's filename opens it when the relative path resolves.
+  If gf fails, use the guide picker or an absolute :e path.
+  Outside Neovim: less ~/.config/nvim/NEOVIM_GUIDES/07_LSP_COMPLETION.txt
+
+All guide files are plain UTF-8 text. They do not require a Markdown viewer.
+Most lines fit a normal terminal width. Long commands may wrap.
+
+5. KEYHELP: LEARN A KEY OR FIND A FUNCTION
+----------------------------------------------------------------
+KeyHelp is a custom database of 333 entries. Each entry includes its key,
+mode, learning level, category, English description, example, source,
+related keys, and a help tag when available. It explains keys without
+turning native Motions into new help mappings.
+
+  :KeyHelp            open the search picker
+  :KeyHelp e          explain e and related keys E, ge, gE, w, b
+  :KeyHelp ciw        explain a complete editing sequence
+  :KeyHelp d          explain the delete Operator
+  <leader>hh          open the same picker
+  <leader>hk          ask for a key sequence
+  <leader>h1 to h4    open the four learning levels
+  :KeyHelp level 2   open a level by command
+  <leader>hm          list all active mappings, including plugin mappings
+  <leader>?           show buffer-local mapping hints through which-key
+  <leader>ht or :Tutor open the official interactive lesson
+
+To search by a function, open :KeyHelp and type delete, window, register,
+rename, or debug. Key sequences and categories such as Movement also work.
+In details, Enter or K on a heading/related-key line opens official help
+when that line has a help tag. Some plugin help needs its feature to be loaded
+first. q or Esc closes details. / searches its text.
+For an unknown entry, KeyHelp tries active mappings, then an official help
+tag, then a picker search. A word supplied as a command argument can match
+an official tag; use the picker when you want function search.
+which-key is separate: pause after a prefix to see possible next keys.
+
+6. NOTATION AND SOURCES
+----------------------------------------------------------------
+  <leader> is Space; <CR> is Enter; <Esc> is Escape.
+  <C-x> means hold Ctrl and press x. <S-F8> is Shift-F8. <M-j> is Alt-j.
+  Keys written together are pressed in sequence: ciw is c, then i, then w.
+  Insert/Command-line/Terminal prefixes i_, c_, t_ name the mode; do not type them.
+  [NATIVE] built into Vim/Neovim; [NEOVIM] specifically a Neovim feature.
+  [PLUGIN] provided by LazyVim or an installed plugin.
+  [CUSTOM] added by this configuration; [TERMINAL] handled by the desktop/terminal.
+  UNAVAILABLE means the feature is not configured in the stated context.
+  NOT TESTED means no current test proves the described execution/UI behavior.
+
+Normal Mode, Insert Mode, Visual Mode, Buffer, Window, Register, Macro,
+Motion, Operator, Text Object, and Language Server keep their standard names.
+The chapter introducing each term gives a short explanation.
+
+7. COMMON MISTAKES AND RECOVERY
+----------------------------------------------------------------
+Start editor commands in the named mode. Esc returns from normal editing
+modes; Ctrl-\ Ctrl-n returns from Terminal Mode.
+A missing explicit mapping can still be a working native key.
+An LSP mapping can be absent until the server attaches and supports it.
+Auto-save may have written a mistake: use undo and review Git diff. :q!
+and :e! only discard changes that are still unsaved.
+Use scratch buffers or disposable copies for exercises. Do not use a broad
+Git reset as a routine way to clean up learning experiments.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+Learn a few Motions, then combine them with d, c, and y.
+i = inner, a = around, dot = repeat the last change.
+Use help when you forget. Fast recall grows from repeated small tasks.
+
+9. A 30-DAY PRACTICE PATH
+----------------------------------------------------------------
+Spend about 20 to 40 minutes a day. Use scratch text or copied demo projects.
+  Days 1-2:   modes, saving, quitting, undo, Tutor (01).
+  Days 3-5:   words, line ends, f/t, counts, jumps, Marks (02).
+  Days 6-7:   basic changes and dot repeat; review the first week (03).
+  Days 8-10:  Operators, Text Objects, Visual blocks, comments, surround (03).
+  Days 11-12: search, confirmed substitution, grep, quickfix (04).
+  Days 13-14: buffers, windows, file and symbol navigation (05-06).
+  Days 15-17: completion, hover, navigation, diagnostics, rename (07).
+  Days 18-19: Go or Java project flow; run and build (08 or 09).
+  Days 20-21: test a small change and debug one request (10).
+  Day 22:     inspect and stage hunks in a disposable Git repo (11).
+  Day 23:     terminal modes and clipboard Registers (12).
+  Days 24-27: named Registers, Macros, :g, cgn, command history (13).
+  Day 28:     read logs and run documentation checks (14).
+  Day 29:     use Neovim for a small real task; write down friction points.
+  Day 30:     review 15, then choose five useful commands to practice next.
+
+10. ADVANCED FEATURES AND LIMITS
+----------------------------------------------------------------
+The setup preserves the existing native key behavior and development tools.
+It does not provide a multiple-cursor plugin, Java neotest adapter, Spring
+bean tool window, or every IntelliJ refactor. File rename depends on server
+capabilities. Lazygit can be absent. Gradle runtime testing remains outstanding.
+Konsole rendering, clipboard sharing, F keys, Alt keys, and terminal key
+forwarding need manual desktop checks. See VERIFICATION.txt for exact scope.
+
+11. MAINTENANCE AND RELATED DOCUMENTATION
+----------------------------------------------------------------
+KeyHelp source: lua/custom/keyhelp/data.lua and lua/custom/keyhelp/init.lua.
+Generators and checks live in scripts/. Read 14_TROUBLESHOOTING.txt before
+regenerating tables. Update only guides affected by a real configuration
+change or an identified documentation error. Save results in MANIFEST.txt.
+Keep the pre-English backup; the original October 22 backup predates these guides.
+Official starting points: :help, :Tutor, and https://neovim.io/doc/user/.

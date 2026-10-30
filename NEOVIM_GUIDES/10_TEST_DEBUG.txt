@@ -1,0 +1,149 @@
+================================================================
+10_TEST_DEBUG — TEST CODE AND INSPECT A RUNNING PROGRAM
+================================================================
+<leader> is Space. [PLUGIN] = LazyVim/plugin. [CUSTOM] = local mappings.
+Go: neotest-golang and Delve through nvim-dap-go.
+Java: java-test and java-debug-adapter through nvim-jdtls.
+Shared debug interface: nvim-dap, dap-ui, and virtual text.
+
+1. WHAT IT DOES AND WHY IT HELPS
+----------------------------------------------------------------
+A test checks expected behavior. A debugger pauses a program so you can
+inspect its state. A breakpoint marks a line where execution should pause.
+A call stack shows the functions that led to the current line.
+Use tests for repeatable checks and debugging to explain unexpected behavior.
+
+2. WHEN TO USE IT
+----------------------------------------------------------------
+Run the nearest test after a small edit. Run a file/class after changing
+shared logic. Run the project suite before committing.
+Debug when output alone does not explain the failure, or when an HTTP
+request behaves differently from your expectation.
+
+3. HOW TO USE IT
+----------------------------------------------------------------
+Go tests [PLUGIN: neotest]:
+  <leader>tt current file; <leader>tr nearest test.
+  <leader>tT all test files at the working-directory scope.
+  <leader>tl repeats the last run; <leader>tS stops it.
+  <leader>ts summary tree; <leader>to output; <leader>tO output panel.
+  <leader>tw toggles watching; <leader>ta attaches to a running test.
+  <leader>td runs the nearest test using the DAP strategy with Delve.
+  Put the cursor inside TestXxx in a *_test.go file for a nearest run.
+  <leader>rt runs go test ./... through the runner [CUSTOM].
+  For a fresh run, use <leader>rc with go test -count=1 ./....
+
+Java tests [PLUGIN: nvim-jdtls + java-test]:
+  Open a Java test and wait for jdtls to attach.
+  <leader>tt current class; <leader>tr nearest method; <leader>tT picks a test.
+  Results use notifications and the debug console, <leader>dr.
+  These are Java-buffer-local mappings. They override the generic Go test actions.
+  Tests run through the Java debug integration, so active breakpoints may pause them.
+  <leader>rt runs Maven or Gradle tests in a terminal [CUSTOM].
+  There is no Java neotest adapter here. Do not use its summary as Java results.
+
+Set breakpoints [PLUGIN]:
+  <leader>db toggles a breakpoint. <leader>dB asks for a condition.
+  Choose an executable line, not a blank line or comment.
+  :DapClearBreakpoints removes all editor breakpoints.
+  Conditions are expressions in the debugger's language and must be valid.
+
+Start and stop [PLUGIN]:
+  <leader>dc starts or continues. First choose a launch configuration.
+  Go API: Debug app (module main package) [CUSTOM configuration label].
+  Java: Launch ... MainClass; wait until jdtls can discover it.
+  <leader>dl reruns the last debug configuration.
+  <leader>da starts with arguments. <leader>dP pauses execution.
+  <leader>dt or :DapTerminate ends the session.
+  :DapDisconnect disconnects; target termination depends on adapter/session options.
+
+4. IMPORTANT DEBUG CONTROLS
+----------------------------------------------------------------
+  Action                   Function key [CUSTOM]   Leader key [PLUGIN]
+  Continue                 F9                      <leader>dc
+  Step over a call         F8                      <leader>dO
+  Step into a call         F7                      <leader>di
+  Step out of a function   Shift-F8                <leader>do
+  Run to the cursor        --                      <leader>dC
+  Terminate                --                      <leader>dt
+
+Step over runs a line without entering its calls. Step into follows a call.
+Step out runs until the current function returns. Function keys depend on
+Konsole/KDE forwarding. F20 is also mapped for terminals that encode Shift-F8
+that way. Use the existing leader keys if a function key is intercepted.
+
+Inspect state [PLUGIN]:
+  <leader>du toggles panels for variables, stack, breakpoints, and watches.
+  <leader>de evaluates the cursor expression or Visual selection.
+  <leader>dr opens the REPL (an interactive debug console).
+  <leader>dj / <leader>dk moves between stack frames.
+  :DapVirtualTextToggle toggles values shown beside code.
+  Adapter support controls which expressions and function calls are allowed.
+  Evaluation can have side effects; use simple values first.
+
+5. PRACTICAL EXAMPLES
+----------------------------------------------------------------
+Go: open internal/service/user_test.go, place the cursor in TestGetUser,
+run <leader>tr, and inspect <leader>to. For a Gin handler, set a breakpoint,
+launch the app, and call http://localhost:8088/users/1 from another terminal.
+
+Java: open GreetingServiceImplTest.java and run a class or nearest method.
+For a controller breakpoint, launch DemoApplication and call
+http://localhost:8089/greeting?name=Neovim. Inspect name at the pause.
+These ports belong to the supplied demos, not every Go/Spring application.
+
+6. COMMON MISTAKES
+----------------------------------------------------------------
+A request cannot hit a breakpoint in a route it never calls.
+A debug session and an ordinary runner can compete for the same port.
+Stop the ordinary app before launching a second copy in the debugger.
+No Java launch entry can mean project import is incomplete.
+No nearest test can mean the cursor is outside the test function/method.
+A passing cached Go test does not always imply a fresh process was run.
+A hidden terminal may still be running the previous app.
+
+7. RECOVERY
+----------------------------------------------------------------
+Use <leader>dt for a stuck debug session and Ctrl-c in the runner terminal
+for an ordinary app. Inspect :DapShowLog and :JdtShowLogs before retrying.
+Toggle <leader>du if panels are in the way.
+Do not kill every Java or Go process to clear one session. Identify the
+specific process if termination through the debugger did not finish.
+Undo a deliberately broken assertion after the exercise.
+
+8. MEMORY TIPS
+----------------------------------------------------------------
+t = test. d = debug. r = runner.
+tt tests a file/class; tr tests right here. Java tT picks rather than runs all.
+db = debug breakpoint. dB adds a condition.
+
+9. PRACTICE
+----------------------------------------------------------------
+Use a disposable project copy.
+1. Run a Go test file, then one test. Inspect both output views.
+2. Change an assertion to fail, run it, then undo and rerun.
+3. Repeat with a Java test class and nearest method.
+4. Debug one HTTP request. Explain the top two stack frames.
+5. Step over, into, and out; continue the request and terminate.
+6. Try a conditional breakpoint with an expression valid for your adapter.
+7. Verify the app stopped before starting another session.
+
+10. ADVANCED FEATURES AND LIMITS
+----------------------------------------------------------------
+Go/Java attach, Go test debugging, and Java hot code replace require
+runtime checks beyond this documentation migration.
+LazyVim can read .vscode/launch.json; the supplied demos do not exercise it.
+No coverage UI is configured. Use CLI tools through <leader>rc, such as
+go test -cover ./..., go test -race ./..., or go test -bench=. ./....
+Inspect :DapShowLog after enabling :DapSetLogLevel TRACE for a reproduction;
+return to normal logging afterward. Avoid sharing logs with secrets.
+
+11. RELATED DOCUMENTATION
+----------------------------------------------------------------
+  :help dap        :help dapui       :help neotest
+  https://github.com/leoluz/nvim-dap-go
+  https://github.com/fredrikaverpil/neotest-golang
+  https://github.com/mfussenegger/nvim-jdtls
+08_GO_GIN.txt and 09_JAVA_SPRING.txt explain project setup.
+Verification details: VERIFICATION.txt. Mapping/config checks are separate
+from actual test execution and end-to-end debugger sessions.

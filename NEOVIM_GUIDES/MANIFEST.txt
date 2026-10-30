@@ -1,0 +1,98 @@
+MANIFEST — ENGLISH NEOVIM GUIDES
+========================================================================
+Neovim: v0.12.5
+LazyVim: 16.0.1
+lazy-lock.json sha256 prefix: 2861444b7e9c
+Updated: 2026-10-29
+
+Resume: review this file and VERIFICATION.txt before editing verified files.
+Translation changes require a new verification even when the old guide was VERIFIED.
+Backup: /home/elvispham/.config/nvim/.documentation-backups/20261029-191815
+Checkpoint reused: ~/.cache/nvim-guides-work/keymaps_dump.tsv (588 rows),
+commands_dump.tsv (105 rows), harness/lsputil, facts and native-command results.
+Old dump predates <leader>hg; current mappings and plugin sources take priority.
+
+States: PENDING -> IN_PROGRESS -> COMPLETE -> VERIFIED; BLOCKED if needed.
+VERIFIED means UTF-8/content, references, commands/help tags, and mapping checks passed.
+It does not mean that interactive terminal behavior or every development workflow was run.
+
+00_INDEX.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: KeyHelp UI, docs menu, guide list
+  Unresolved: Konsole rendering/key delivery remain manual. No incomplete guide work.
+  SHA-256: 4a3a8f05e2ff81803168e3b9028a637189c59f7c6a90b6cc93bff47729eeaa71
+01_SURVIVAL.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: options, autosave, native editing
+  Unresolved: Desktop mode/statusline appearance is NOT TESTED.
+  SHA-256: 64330a39d7ca07e70905df5082a7f8827e73ededd5ba8137e03bccdb52e0395b
+02_MOVEMENT.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: restored motions, Treesitter mappings
+  Unresolved: Konsole key delivery and Treesitter movement UI are NOT TESTED.
+  SHA-256: 0e5e30b3e9a0d0bded6900e484a596dcd4b34d2be06d797f930baa97ce90734e
+03_EDITING.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: mini.ai, mini.surround, comment mappings
+  Unresolved: Visual/snippet/surround UI and Alt-key delivery are NOT TESTED.
+  SHA-256: 368b615a5f49d62111e3a9650d9f4c16b711906ebe50d03b5613a8351c681ec4
+04_SEARCH_REPLACE.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: picker, grug-far, quickfix
+  Unresolved: Interactive project replacement UI is NOT TESTED.
+  SHA-256: f03cf2d6ead778694b4a5514e82bb499da3b46166feb8d6f0cf4c5536aaf4cec
+05_BUFFERS_WINDOWS.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: buffer/window mappings, persistence
+  Unresolved: Session restore, zoom, and layout UI are NOT TESTED.
+  SHA-256: ce3fca1b415716acad10e70efc7c6e7a21099cf9550c61021e47e7d9738c600a
+06_FILE_NAVIGATION.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: picker, explorer, LazyVim root
+  Unresolved: Destructive explorer operations and symbol picker rendering are NOT TESTED.
+  SHA-256: 6e79bac7547ebd9b529334dd7b022e29f759313947eefe79b4fa5d75250c1929
+07_LSP_COMPLETION.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: LSP keymaps, blink.cmp, conform
+  Unresolved: Completion rendering, range formatting, and extraction UI are NOT TESTED.
+  SHA-256: 6fcec718ace16c469ad95311c27241e1afdd9675e74a229db5c29dbc2b52bba1
+08_GO_GIN.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: go.lua, runner, Go extra
+  Unresolved: Fresh test/debug/HTTP execution is NOT TESTED; live LSP/goimports passed.
+  SHA-256: 4c3e52ef8ee9a9f3e85d77e95c3f70bfe781e657154c20450c8bf38c55fb84ff
+09_JAVA_SPRING.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: java.lua, custom/java.lua, Java extra
+  Unresolved: Gradle, fresh JUnit/debug/HTTP execution, and hot replace are NOT TESTED.
+  SHA-256: ed109e65bd8df941b845d98e50ca86591e07195cdd5c9928995af180a7e3f3b4
+10_TEST_DEBUG.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: debug.lua, neotest, nvim-jdtls
+  Unresolved: Integration configuration passed; fresh test/debug execution is NOT TESTED.
+  SHA-256: 32bcc228dd7c79b86825c297a4127a4a43812cb034339ba1e491bbb5d5c416d9
+11_GIT.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: gitsigns, Git pickers
+  Unresolved: Git stage/reset/blame and remote actions are NOT TESTED.
+  SHA-256: 9ca93c7f154396daee44a3972ffbe6fb18c8e8d952a51c9854c470236b9aeba3
+12_TERMINAL_CLIPBOARD.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: runner, Snacks terminal, clipboard option
+  Unresolved: Desktop clipboard, PRIMARY, mouse, and physical shortcuts are NOT TESTED.
+  SHA-256: c5100fd360587e95e42b805409fc045c5c1e6dec4657da112ff227f84d54a31c
+13_ADVANCED_VIM.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: native commands, Registers, Macros
+  Unresolved: Macro/history terminal UI and every advanced recipe are NOT TESTED.
+  SHA-256: b11626bc6f494053b3a75ebe3f70a8ffacab662b10b0e165aad013bd717bfa5e
+14_TROUBLESHOOTING.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: verification scripts, backup paths
+  Unresolved: Network registry refresh is BLOCKED in sandbox; updates/restore not executed.
+  SHA-256: 4a8b4b7828e26e4a99b53fdd3d991aabdf81b57ca68ea617f2d8178866996ad4
+15_KEYMAPS.txt  VERIFIED
+  Last check: 2026-10-29: English/UTF-8/sections/refs/generated content PASS; guide mappings 0 errors, 0 stamp warnings; 190 help topics resolve in loaded-plugin context.
+  Dependencies: data.lua, generator, mapping snapshot
+  Unresolved: Real-buffer mapping collection passed; physical shortcuts remain NOT TESTED.
+  SHA-256: bf19ce182faf553a134137387d4213e8bae5b09555834037745e56d663cd8230
